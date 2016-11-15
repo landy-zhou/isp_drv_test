@@ -1,2 +1,2 @@
 all:
-	ndk-build V=1 -B
+	ndk-build V=1

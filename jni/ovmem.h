@@ -18,6 +18,7 @@
 
 #define OVM_CONTIG	(1u << 0)
 #define OVM_SYSTEM	(1u << 1)
+#define OVM_DMA		(1u << 4)
 #define OVM_CACHED	(1u << 16)
 #define OVM_NESYNC	(1u << 17)
 

@@ -69,18 +69,24 @@ void *vb_alloc(unsigned long size, int *pfd)
 	struct memory_item *item = NULL;
 	int buf_fd;
 
-
+/*
 #ifdef USE_SYSTEM_MEM
 	buf_fd = ovmem_alloc(size, OVM_SYSTEM, OVM_DEF_ALIGN);
 #else
 	buf_fd = ovmem_alloc(size, OVM_CONTIG, OVM_DEF_ALIGN);
 #endif
+*/
+	buf_fd = ovmem_alloc(size, OVM_DMA, OVM_DEF_ALIGN);
+
 	if (buf_fd < 0)
-		pr_error("buffer allocate failed");
+	{
+		pr_error("buffer allocate failed\n");
+		return NULL;
+	}
 
 	vaddr = ovmem_mmap(buf_fd, size, 0);
 	if (vaddr == NULL)
-		pr_error("failed to get VA");
+		pr_error("failed to get VA\n");
 
 	ovmem_get_phys(buf_fd, (long unsigned int *)&paddr);
 

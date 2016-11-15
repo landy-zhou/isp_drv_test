@@ -13,12 +13,15 @@ static char *v5216_path_name[] = {
 	V5216_PATH_YUV_2_NAME,
 	V5216_PATH_RAW_2_NAME,
 	V5216_PATH_M2M_2_NAME,
-	"v5216isd-HighSpeed",
-	"v5216isd-HDRProcess",
-	"v5216isd-3DStereo",
-
+	V5216_PATH_COMBINE_NAME,
+	V5216_PATH_HIGHSPEED_NAME,  
+	V5216_PATH_HDRPROCESS_NAME,
+	V5216_PATH_3DSTEREO_NAME,
+	V5216_PATH_YUVOFFLINE1_NAME,
+	V5216_PATH_YUVOFFLINE2_NAME,
+	V5216_PATH_PDNS_NAME,
+	V5216_PATH_COMBINE_NAME
 };
-
 #if 0
 int CamLinkUnitApply(struct CamNode *node, struct CamLinkUnit *unit, int flag)
 {
@@ -538,6 +541,7 @@ struct PlatCam *MediaLibInit()
 		struct CamNode *node;
 		if (me == NULL)
 			break;
+		app_info("Find media_entity: %s",me->info.name);
 		node = CamNodeCreate(cam, me, i);
 		if (node == NULL)
 			goto out;
@@ -557,7 +561,7 @@ struct PlatCam *MediaLibInit()
 	int j;
 	for (j = 0; j < cam->node[i]->NrLink; j++) {
 		struct CamLink *link = cam->node[i]->link[j];
-			app_info("%s link%d: '%s'=>'%s'", cam->node[i]->name, j, link->src->name, link->dst->name);
+			//app_info("%s link%d: '%s'=>'%s'", cam->node[i]->name, j, link->src->name, link->dst->name);
 	}
 #endif
 		}
@@ -568,7 +572,7 @@ struct PlatCam *MediaLibInit()
 	if (ret < 0)
 		goto out;
 
-	ret = MediaLibFindPath(cam);
+	ret = MediaLibFindPath(cam); //isp pipelines or other paths
 	if (ret < 0)
 		goto out;
 
@@ -578,7 +582,10 @@ struct PlatCam *MediaLibInit()
 
 	ret = MediaLibSearchRoute(cam);
 	if (ret < 0)
-		goto out;
+	{
+	    app_err("MediaLibSearchRoute error\n");
+	    goto out;
+	}
 	/* This is just a W/R to retain power status */
 	{
 		int sid;
@@ -588,11 +595,13 @@ struct PlatCam *MediaLibInit()
 		/* retain ISP power */
 		me = media_get_entity_by_name(cam->media, V5216_IDI1_NAME, strlen(V5216_IDI1_NAME));
 		if (me == NULL) {
-			ret = -ENODEV;
-			goto out;
+		    app_err("media_get_entity_by_name error\n");
+		    ret = -ENODEV;
+		    goto out;
 		}
 		node = GetContainer(me);
 		if (node == NULL) {
+		    app_err("GetContainer error\n");
 			ret = -ENODEV;
 			goto out;
 		}

@@ -14,12 +14,12 @@ static pthread_mutex_t ovm_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int get_device_fd(void)
 {
-	pthread_mutex_lock(&ovm_mutex);
+	//pthread_mutex_lock(&ovm_mutex);
 
-	if (ovm_device_fd < 0)
+	//if (ovm_device_fd < 0)
 		ovm_device_fd = ion_open();
 
-	pthread_mutex_unlock(&ovm_mutex);
+	//pthread_mutex_unlock(&ovm_mutex);
 
 	return ovm_device_fd;
 }
@@ -35,11 +35,13 @@ int ovmem_alloc(size_t len, unsigned int flags, size_t align)
 		ion_flags |= ION_FLAG_CACHED;
 	if (flags & OVM_NESYNC)
 		ion_flags |= ION_FLAG_CACHED_NEEDS_SYNC;
-
+	
 	if (flags & OVM_CONTIG)
 		heap = ION_HEAP_CARVEOUT_MASK;
 	if (flags & OVM_SYSTEM)
 		heap = ION_HEAP_SYSTEM_MASK;
+	if (flags & OVM_DMA)
+		heap = ION_HEAP_TYPE_DMA_MASK;	
 
 	device_fd = get_device_fd();
 	if (device_fd < 0)

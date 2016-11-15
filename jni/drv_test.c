@@ -14,7 +14,7 @@
 
 #include "MediaLib.h"
 #include "CameraAPI.h"
-#define DUMPRAW
+//#define DUMPRAW
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 #define PRV_FMT 0
@@ -243,10 +243,16 @@ int main(int argc, char **argv)
 
 	ret = CameraContextPara(pcam, CID1, para, ARRAY_SIZE(para));
 	if (ret < 0)
+	{
+	    app_err("CID1 camera context para configure failed\n");
 	    goto out;
+	}
 	ret = CameraContextPara(pcam, CID2, para, ARRAY_SIZE(para));
 	if (ret < 0)
+	{
+	    app_err("CID2 camera context para configure failed\n");
 	    goto out;
+	}
     } else {
 	// Offline process parameters
 	struct CamNodeFmtCombo CropCfg = {

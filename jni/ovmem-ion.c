@@ -8,6 +8,7 @@
 #include <sys/mman.h>
 #include "ion.h"	
 #include "ovmem.h"	
+#include "MediaLib.h"
 
 static int ovm_device_fd = -ENOENT;
 static pthread_mutex_t ovm_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -77,6 +78,7 @@ int ovmem_set_name(int fd, const char *name)
 	data.fd = fd;
 	strncpy(data.name, name, ION_BUFFER_NAME_LEN);
 	ret = ioctl(device_fd, ION_IOC_NAME, &data);
+	app_info("ioctl,ION_IOC_NAME\n");
 
 	return ret;
 }
@@ -93,6 +95,7 @@ int ovmem_get_phys(int fd, unsigned long *pa)
 
 	data.fd = fd;
 	ret =  ioctl(device_fd, ION_IOC_PHYS, &data);
+	app_info("ioctl,ION_IOC_SYNC\n");
 
 	if (ret == 0)
 		*pa = (unsigned long)data.addr;
@@ -112,6 +115,7 @@ int ovmem_sync(int fd)
 
 	data.fd = fd;
 	ret =  ioctl(device_fd, ION_IOC_SYNC, &data);
+	app_info("ioctl,ION_IOC_SYNC\n");
 
 	return ret;
 }
@@ -158,6 +162,7 @@ int ovmem_notify(int fd, unsigned int note)
 		return -ENOENT;
 
 	ret =  ioctl(device_fd, ION_IOC_NOTIFY, &data);
+	app_info("ioctl, ION_IOC_NOTIFY\n");
 	if (ret)
 		return ret;
 

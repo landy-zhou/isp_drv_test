@@ -347,7 +347,7 @@ __END_DECLS
 	} while (0)
 #define app_info(format, arg...)		\
 	do { \
-	printf("[app:INFO]: " format "\n", ## arg); \
+	printf("[app:INFO][%s]: " format "\n",__FUNCTION__, ## arg); \
 	fflush(stdout); \
 	} while (0)
 #endif

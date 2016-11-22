@@ -311,6 +311,7 @@ static int CamNodeGetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 			.pad	= combo->pad,
 		};
 		ret = ioctl(node->me->fd, VIDIOC_SUBDEV_G_SELECTION, &sel);
+		app_info("ioctl,VIDIOC_SUBDEV_G_SELECTION\n");
 		if (ret < 0) {
 			app_err("MediaLib failed to get selection '%s': %s", node->me->devname, strerror(errno));
 			ret = -errno;
@@ -327,6 +328,7 @@ static int CamNodeGetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 			.which	= combo->which,
 		};
 		ret = ioctl(node->me->fd, VIDIOC_SUBDEV_G_FMT, &fmt);
+		app_info("ioctl,VIDIOC_SUBDEV_G_FMT\n");
 		if (ret < 0) {
 			app_err("MediaLib failed to get format '%s': %s", node->me->devname, strerror(errno));
 			ret = -errno;
@@ -349,7 +351,8 @@ static int CamNodeSetCtrl(struct CamNode *node, struct CamCtx *ctx)
 	if (fd < 0)
 		return fd;
 
-	ret = ioctl(fd, VIDIOC_PRIVATE_V5216ISP_TOPOLOGY_SNAPSHOT, ctx);
+	ret = ioctl(fd, VIDIOC_PRIVATE_B52ISP_TOPOLOGY_SNAPSHOT, ctx);
+	app_info("ioctl,VIDIOC_PRIVATE_B52ISP_TOPOLOGY_SNAPSHOT\n");
 	if (ret < 0) {
 		app_err("MediaLib failed to trigger topology snapshot for context '%s' => '%s': %s", ctx->src->name, ctx->path->name, strerror(errno));
 		ret = -errno;

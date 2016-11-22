@@ -138,9 +138,9 @@ int main(int argc, char **argv)
 	    .buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
 	    .width = 640,
 	    .height = 480,
-	    .fmt_id = FMT_ID_UYVY,
-	    .NrBuf = 3,
-	    .NrFrame = 8,
+	    .fmt_id = FMT_ID_NV12,
+	    .NrBuf = 1,
+	    .NrFrame = 1,
 	    .save = 1,
 	},
 	[1] = {
@@ -196,8 +196,8 @@ int main(int argc, char **argv)
 	struct CamNodeFmtCombo SensorCfg = {
 	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
 	    //	.pad	= 0,
-	    .width	= 2592,
-	    .height	= 1944,
+	    .width	= 640,
+	    .height	= 480,
 	    .code	= V4L2_MBUS_FMT_SBGGR10_1X10,
 	    .scope	= (1 << PARAM_APPLY_FMT), // Current only support set format
 	};
@@ -207,11 +207,11 @@ int main(int argc, char **argv)
 	    .CropWnd = {	// For Output <t,l,w,h>
 		.left	= 0,
 		.top	= 0,
-		.width	= 2592,
-		.height	= 1944,
+		.width	= 640,
+		.height	= 480,
 	    },
-	    .width	= 2592,	// IDI Control: scale disable
-	    .height	= 1944,
+	    .width	= 640,	// IDI Control: scale disable
+	    .height	= 480,
 	    .code	= V4L2_MBUS_FMT_UYVY8_2X8,
 	    .scope	= (1 << PARAM_APPLY_CROP) | (1 << PARAM_APPLY_FMT),
 	};
@@ -221,8 +221,8 @@ int main(int argc, char **argv)
 	    .CropWnd = {
 		.left	= 0,
 		.top	= 0,
-		.width	= 2592,	// 2X Zoom
-		.height	= 1944,
+		.width	= 640,	// 2X Zoom
+		.height	= 480,
 	    },
 	    .scope	= (1 << PARAM_APPLY_CROP),
 	};
@@ -261,12 +261,12 @@ int main(int argc, char **argv)
 	    .CropWnd = {
 		.left	= 0,
 		.top	= 0,
-		.width	= 2592,
-		.height	= 1944,
+		.width	= 640,
+		.height	= 480,
 	    },
-	    .width	= 2592,	// 1X1 Bining
-	    .height	= 1944,
-	    .code	= V4L2_MBUS_FMT_UYVY8_2X8,
+	    .width	= 640,	// 1X1 Bining
+	    .height	= 480,
+	    .code	= V4L2_MBUS_FMT_NV12_1X12,
 	    .scope	= (1 << PARAM_APPLY_CROP) | (1 << PARAM_APPLY_FMT),
 	};
 	struct CamNodeFmtCombo PathCfg = {
@@ -275,8 +275,8 @@ int main(int argc, char **argv)
 	    .CropWnd = {
 		.left	= 0,
 		.top	= 0,
-		.width	= 2592,	// 1X Zoom
-		.height	= 1944,
+		.width	= 640,	// 1X Zoom
+		.height	= 480,
 	    },
 	    .scope	= (1 << PARAM_APPLY_CROP),
 	};
@@ -306,14 +306,14 @@ int main(int argc, char **argv)
 	}
 	memset(in, 0, sizeof(in));
 	strcpy(in->name, "RAWInput");
-	strcpy(in->InputName, "input.raw");
-	in->NrFrame = 10;
+	strcpy(in->InputName, "2592x1944.raw10");
+	in->NrFrame = 1;
 	in->buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
 	in->fmt_id = FMT_ID_BA81;
-	in->width = 2592;
-	in->height = 1944;
+	in->width = 640;
+	in->height = 480;
 	in->NrBuf = 1;
-	in->load = 1;
+	in->load = 0;
 	in->fd_cam = in_fd;
     }
 

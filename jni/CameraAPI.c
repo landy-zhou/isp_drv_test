@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-
+#include "MediaLib.h"
 #include "CameraAPI.h"
 #include "vbmem_lib.h"
 
@@ -186,6 +186,7 @@ int SetStreamFmt(struct camera_stream_t *pstr)
     if (ret < 0)
 	return ret;
     ret = ioctl(pstr->fd_cam, VIDIOC_S_FMT, &StrFmt);
+	app_info("ioctl,VIDIOC_S_FMT\n");
     if (ret  < 0)
     {
 	c_err("%s: set format failed: %s", pstr->name, strerror(errno));
@@ -214,6 +215,7 @@ int SetStreamFmt(struct camera_stream_t *pstr)
 	c_err("can't require buffer:%s", strerror(errno));
 	return -5;
     }
+    app_info("ioctl,VIDIOC_REQBUFS\n");
     if (buf_req.count != pstr->NrBuf)
     {
 	c_err("insufficient buffer allocated\n");
@@ -224,6 +226,8 @@ int SetStreamFmt(struct camera_stream_t *pstr)
     int i, j, w = pstr->width, h = pstr->height;
     int size = w * h * FmtMap[pstr->fmt_id].bpp / 8;
     void *addr = NULL;
+    app_info("%s_%s_%dX%d", pstr->name,FmtMap[pstr->fmt_id].name, pstr->width, pstr->height);
+
 
     if (pstr->fmt_id == FMT_ID_JPEG && size < 1024*1024)
     {
@@ -245,6 +249,7 @@ int SetStreamFmt(struct camera_stream_t *pstr)
 		ret =-2;
 		goto LABEL_RELEASE_CAM_BUFFER;
 	 }
+	app_info("ioctl,VIDIOC_QUERYBUF\n");
 	addr = mmap (NULL, v4l2_buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, pstr->fd_cam, v4l2_buf.m.offset);
 	if (addr < 0) {
 	    c_err("failed mmap video buffer,%s \n",strerror(errno));
@@ -286,6 +291,7 @@ int SetStreamFmt(struct camera_stream_t *pstr)
 	    goto LABEL_RELEASE_CAM_BUFFER;
 	}
     }
+     app_info("ioctl,VIDIOC_QBUF\n");
 
     /* misc */
     if (pstr->save) {
@@ -349,6 +355,7 @@ int ClrCamFmt(struct camera_stream_t *pstr)
 	.memory	= DEFAULT_MEM_TYPE,
     };
     ret = ioctl(pstr->fd_cam, VIDIOC_REQBUFS, &buf_req);
+    app_info("ioctl,VIDIOC_REQBUFS\n");
     if (ret < 0)
 	c_warn("%s: can't clean buffer:%s", pstr->name, strerror(errno));
 
@@ -402,6 +409,7 @@ int ContextRun(struct camera_stream_t *pstr)
 
     // Now we start the real thing
     ret = ioctl(pstr->fd_cam, VIDIOC_STREAMON, &pstr->buf_type);
+    app_info("ioctl,VIDIOC_STREAMON\n");
     if (ret < 0)
     {
 	c_err("%s: streamon failed: %s", pstr->name, strerror(errno));
@@ -431,6 +439,7 @@ LABEL_DQBUF:
 	    ret = errno;
 	    goto LABEL_STREAM_OFF;
 	}
+	app_info("ioctl,VIDIOC_DQBUF\n");
 	c_info("%s: Got Frame %4d", pstr->name, i+1);
 
 	src = pstr->dsc[cam_buffer.index].addr;
@@ -458,6 +467,7 @@ LABEL_DQBUF:
 
 LABEL_STREAM_OFF:
     ioctl(pstr->fd_cam, VIDIOC_STREAMOFF, &pstr->buf_type);
+    app_info("ioctl,VIDIOC_STREAMOFF\n");
 
 LABEL_EXIT:
     if (pstr->save) {

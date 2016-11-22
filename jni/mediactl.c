@@ -39,6 +39,8 @@
 
 #include "mediactl.h"
 #include "tools.h"
+#include "MediaLib.h"
+
 
 struct media_pad *media_entity_remote_source(struct media_pad *pad)
 {
@@ -139,6 +141,7 @@ int media_setup_link(struct media_device *media,
 	ulink.flags = flags | (link->flags & MEDIA_LNK_FL_IMMUTABLE);
 
 	ret = ioctl(media->fd, MEDIA_IOC_SETUP_LINK, &ulink);
+	app_info("ioctl,MEDIA_IOC_SETUP_LINK\n");
 	if (ret == -1) {
 		media_dbg(media, "%s: Unable to setup link (%s)\n",
 			  __func__, strerror(errno));
@@ -218,6 +221,7 @@ static int media_enum_links(struct media_device *media)
 			free(links.links);
 			return -errno;
 		}
+		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
 
 		for (i = 0; i < entity->info.pads; ++i) {
 			entity->pads[i].entity = entity;
@@ -388,6 +392,7 @@ static int media_enum_entities(struct media_device *media)
 		entity->media = media;
 
 		ret = ioctl(media->fd, MEDIA_IOC_ENUM_ENTITIES, &entity->info);
+		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
 		if (ret < 0) {
 			ret = errno != EINVAL ? -errno : 0;
 			break;
@@ -466,6 +471,7 @@ struct media_device *media_open_debug(
 	}
 
 	ret = ioctl(media->fd, MEDIA_IOC_DEVICE_INFO, &media->info);
+	app_info("ioctl,MEDIA_IOC_DEVICE_INFO\n");
 	if (ret < 0) {
 		media_dbg(media, "%s: Unable to retrieve media device "
 			  "information for device %s (%s)\n", __func__,

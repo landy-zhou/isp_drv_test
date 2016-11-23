@@ -154,41 +154,41 @@ enum v4l2_priv_colorfx {
 #define V4L2_CID_SENSOR_OTP_CONTROL_LENC	0x02
 
 /* entity component names */
-#define V5216_IDI1_NAME		"b52isd-IDI1"
-#define V5216_IDI2_NAME		"b52isd-IDI2"
-#define V5216_PATH_YUV_1_NAME	"b52isd-Pipeline#1"
-#define V5216_PATH_YUV_2_NAME	"b52isd-Pipeline#2"
-#define V5216_PATH_RAW_1_NAME	"b52isd-DataDump#1"
-#define V5216_PATH_RAW_2_NAME	"b52isd-DataDump#2"
-#define V5216_PATH_M2M_1_NAME	"b52isd-MemorySensor#1"
-#define V5216_PATH_M2M_2_NAME	"b52isd-MemorySensor#2"
-#define V5216_PATH_HIGHSPEED_NAME	"b52isd-HighSpeed"
-#define V5216_PATH_HDRPROCESS_NAME	"b52isd-HDRProcess"
-#define V5216_PATH_3DSTEREO_NAME	"b52isd-3DStereo"
-#define V5216_PATH_YUVOFFLINE1_NAME	"b52isd-YUVOFFLINE1"
-#define V5216_PATH_YUVOFFLINE2_NAME	"b52isd-YUVOFFLINE2"
-#define V5216_PATH_PDNS_NAME	"b52isd-PDNS"
-#define V5216_PATH_COMBINE_NAME	"b52isd-combine"
-#define V5216_OUTPUT_1_NAME	"b52isd-Output-1"
-#define V5216_OUTPUT_2_NAME	"b52isd-Output-2"
-#define V5216_OUTPUT_3_NAME	"b52isd-Output-3"
-#define V5216_OUTPUT_4_NAME	"b52isd-Output-4"
-#define V5216_OUTPUT_5_NAME	"b52isd-Output-5"
-#define V5216_OUTPUT_6_NAME	"b52isd-Output-6"
-#define V5216_OUTPUT_7_NAME	"b52isd-Output-7"
-#define V5216_OUTPUT_8_NAME	"b52isd-Output-8"
-#define V5216_INPUT_1_NAME	"b52isd-Input-1"
-#define V5216_INPUT_2_NAME	"b52isd-Input-2"
-#define V5216_INPUT_3_NAME	"b52isd-Input-3"
-#define V5216_INPUT_4_NAME	"b52isd-Input-4"
-#define V5216_INPUT_5_NAME	"b52isd-Input-5"
-#define V5216_INPUT_6_NAME	"b52isd-Input-6"
-#define VDEV_INPUT_1_NAME	"vin<"B52_INPUT_1_NAME">"
-#define VDEV_INPUT_2_NAME	"vin<"B52_INPUT_2_NAME">"
-#define VDEV_INPUT_3_NAME	"vin<"B52_INPUT_3_NAME">"
-#define VDEV_INPUT_4_NAME	"vin<"B52_INPUT_4_NAME">"
-#define VDEV_INPUT_5_NAME	"vin<"B52_INPUT_5_NAME">"
-#define VDEV_INPUT_6_NAME	"vin<"B52_INPUT_6_NAME">"
+#define V5216_IDI1_NAME		"aquilav1isd-IDI1"
+#define V5216_IDI2_NAME		"aquilav1isd-IDI2"
+#define V5216_PATH_YUV_1_NAME	"aquilav1isd-Pipeline#1"
+#define V5216_PATH_YUV_2_NAME	"aquilav1isd-Pipeline#2"
+#define V5216_PATH_RAW_1_NAME	"aquilav1isd-DataDump#1"
+#define V5216_PATH_RAW_2_NAME	"aquilav1isd-DataDump#2"
+#define V5216_PATH_M2M_1_NAME	"aquilav1isd-MemorySensor#1"
+#define V5216_PATH_M2M_2_NAME	"aquilav1isd-MemorySensor#2"
+#define V5216_PATH_HIGHSPEED_NAME	"aquilav1isd-HighSpeed"
+#define V5216_PATH_HDRPROCESS_NAME	"aquilav1isd-HDRProcess"
+#define V5216_PATH_3DSTEREO_NAME	"aquilav1isd-3DStereo"
+#define V5216_PATH_YUVOFFLINE1_NAME	"aquilav1isd-YUVOFFLINE1"
+#define V5216_PATH_YUVOFFLINE2_NAME	"aquilav1isd-YUVOFFLINE2"
+#define V5216_PATH_PDNS_NAME	"aquilav1isd-PDNS"
+#define V5216_PATH_COMBINE_NAME	"aquilav1isd-combine"
+#define V5216_OUTPUT_1_NAME	"aquilav1isd-Output-1"
+#define V5216_OUTPUT_2_NAME	"aquilav1isd-Output-2"
+#define V5216_OUTPUT_3_NAME	"aquilav1isd-Output-3"
+#define V5216_OUTPUT_4_NAME	"aquilav1isd-Output-4"
+#define V5216_OUTPUT_5_NAME	"aquilav1isd-Output-5"
+#define V5216_OUTPUT_6_NAME	"aquilav1isd-Output-6"
+#define V5216_OUTPUT_7_NAME	"aquilav1isd-Output-7"
+#define V5216_OUTPUT_8_NAME	"aquilav1isd-Output-8"
+#define V5216_INPUT_1_NAME	"aquilav1isd-Input-1"
+#define V5216_INPUT_2_NAME	"aquilav1isd-Input-2"
+#define V5216_INPUT_3_NAME	"aquilav1isd-Input-3"
+#define V5216_INPUT_4_NAME	"aquilav1isd-Input-4"
+#define V5216_INPUT_5_NAME	"aquilav1isd-Input-5"
+#define V5216_INPUT_6_NAME	"aquilav1isd-Input-6"
+#define VDEV_INPUT_1_NAME	"vin<"AQUILAV1_INPUT_1_NAME">"
+#define VDEV_INPUT_2_NAME	"vin<"AQUILAV1_INPUT_2_NAME">"
+#define VDEV_INPUT_3_NAME	"vin<"AQUILAV1_INPUT_3_NAME">"
+#define VDEV_INPUT_4_NAME	"vin<"AQUILAV1_INPUT_4_NAME">"
+#define VDEV_INPUT_5_NAME	"vin<"AQUILAV1_INPUT_5_NAME">"
+#define VDEV_INPUT_6_NAME	"vin<"AQUILAV1_INPUT_6_NAME">"
 
 /* the specific controls */
 #define V4L2_CID_PRIVATE_AF_MODE \
@@ -223,26 +223,26 @@ enum v4l2_priv_colorfx {
 
 
 
-#define VIDIOC_PRIVATE_B52ISP_TOPOLOGY_SNAPSHOT \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_TOPOLOGY_SNAPSHOT \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 0, struct v5216isp_profile)
-#define VIDIOC_PRIVATE_B52ISP_CONFIG_AF_WINDONW \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_AF_WINDONW \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 1, struct v4l2_rect)
-#define VIDIOC_PRIVATE_B52ISP_CONFIG_EXPO_METERING_MODE \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_EXPO_METERING_MODE \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 2, struct v5216isp_expo_metering)
-#define VIDIOC_PRIVATE_B52ISP_CONFIG_EXPO_METERING_ROI \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_EXPO_METERING_ROI \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 3, struct v5216isp_win)
-#define VIDIOC_PRIVATE_B52ISP_DOWNLOAD_CTDATA \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_DOWNLOAD_CTDATA \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 4, struct v5216_data_node)
-#define VIDIOC_PRIVATE_B52ISP_UPLOAD_CTDATA \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_UPLOAD_CTDATA \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 5, struct v5216_data_node)
-#define VIDIOC_PRIVATE_B52ISP_CONFIG_AWB_GAIN \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_AWB_GAIN \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 6, struct v5216isp_awb_gain)
-#define VIDIOC_PRIVATE_B52ISP_CONFIG_MEMORY_SENSOR \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_MEMORY_SENSOR \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 7, struct memory_sensor)
-#define VIDIOC_PRIVATE_B52ISP_CONFIG_ADV_DNS \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_ADV_DNS \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 8, struct v5216isp_adv_dns)
-#define VIDIOC_PRIVATE_B52ISP_SET_PATH_ARG \
+#define VIDIOC_PRIVATE_AQUILAV1ISP_SET_PATH_ARG \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 9, struct v5216isp_path_arg)
-#define VIDIOC_PRIVATE_B52ISP_ANTI_SHAKE\
+#define VIDIOC_PRIVATE_AQUILAV1ISP_ANTI_SHAKE\
 	_IOW('V', BASE_VIDIOC_PRIVATE + 10, struct v5216isp_anti_shake_arg)
 #endif /* _V5216_API_H */

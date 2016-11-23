@@ -27,6 +27,7 @@
 #include <sys/types.h>
 
 #include "ion.h"	// <ANDROID_DIR>/system/core/include/ion/ion.h
+#include "MediaLib.h"
 
 int ion_open()
 {
@@ -44,6 +45,7 @@ int ion_close(int fd)
 static int ion_ioctl(int fd, int req, void *arg)
 {
         int ret = ioctl(fd, req, arg);
+	 app_info("ioctl,%d\n",req);
         if (ret < 0) {
                 ALOGE("ioctl %x failed with code %d: %s\n", req,
                        ret, strerror(errno));

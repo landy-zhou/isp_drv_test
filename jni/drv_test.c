@@ -306,18 +306,16 @@ int main(int argc, char **argv)
 	}
 	memset(in, 0, sizeof(in));
 	strcpy(in->name, "RAWInput");
-	strcpy(in->InputName, "2592x1944.raw10");
+	strcpy(in->InputName, "640x480.raw10");
 	in->NrFrame = 1;
 	in->buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-	in->fmt_id = FMT_ID_BA81;
+	in->fmt_id = FMT_ID_BG10;
 	in->width = 640;
 	in->height = 480;
 	in->NrBuf = 1;
 	in->load = 0;
 	in->fd_cam = in_fd;
     }
-
-
 
     /* Create output V4L2 thread */
     for (i = 0; i < CTX1_OUTPUT_PORTS; i++) {
@@ -356,7 +354,7 @@ int main(int argc, char **argv)
 	if (ret < 0)
 	    goto exit;
     }
-    sleep(3);
+    //sleep(3);
 #ifdef DUMPRAW
     for (i = 0; i < CTX2_OUTPUT_PORTS; i++) {
 	ret = CameraThreadCreate(c2_out_stream + i);

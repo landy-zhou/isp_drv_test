@@ -409,14 +409,14 @@ int ContextRun(struct camera_stream_t *pstr)
 
     // Now we start the real thing
     ret = ioctl(pstr->fd_cam, VIDIOC_STREAMON, &pstr->buf_type);
-    app_info("ioctl,VIDIOC_STREAMON\n");
+    app_info("%s ioctl,VIDIOC_STREAMON,total frame number %d\n",pstr->name,count);
     if (ret < 0)
     {
 	c_err("%s: streamon failed: %s", pstr->name, strerror(errno));
 	return ret;
     };
 
-    sleep(5);
+    sleep(1);
     for (i = 0; i < count; i++)
     {
 	if (pstr->kill)
@@ -425,7 +425,7 @@ int ContextRun(struct camera_stream_t *pstr)
 	ret = poll(&cam_ufds, 1, V4L2_POLL_TIMEOUT_MS);
 	if (ret)
 	    goto LABEL_DQBUF;
-	c_info("no data");
+	c_info("%s poll timeout no data",pstr->name);
 	goto LABEL_STREAM_OFF;
 LABEL_DQBUF:
 	memset(&cam_buffer, 0, sizeof(cam_buffer));
@@ -435,11 +435,11 @@ LABEL_DQBUF:
 
 	/*dequeue  buffer, get a buffer fetch data*/
 	if (ioctl(pstr->fd_cam, VIDIOC_DQBUF, &cam_buffer)) {
-	    c_err("can't dequeue output buffer: %s", strerror(errno));
+	    c_err("%s can't dequeue output buffer: %s",pstr->name, strerror(errno));
 	    ret = errno;
 	    goto LABEL_STREAM_OFF;
 	}
-	app_info("ioctl,VIDIOC_DQBUF\n");
+	app_info("%s ioctl,VIDIOC_DQBUF\n",pstr->name);
 	c_info("%s: Got Frame %4d", pstr->name, i+1);
 
 	src = pstr->dsc[cam_buffer.index].addr;
@@ -459,20 +459,21 @@ LABEL_DQBUF:
 	fill_v4l2_buf(&cam_buffer, pstr, cam_buffer.index, 0);
 	/* queue buffer, return the buffer to the queue */
 	if (0 != ioctl (pstr->fd_cam, VIDIOC_QBUF, &cam_buffer)) {
-	    printf("app: can't queue camera buffer\n");
+	    printf("%s VIDIOC_QBUF can't queue camera buffer\n",pstr->name);
 	    ret = -6;
 	    goto LABEL_STREAM_OFF;
 	}
+	app_info("%s ioctl,VIDIOC_QBUF success\n",pstr->name);
     }
 
 LABEL_STREAM_OFF:
     ioctl(pstr->fd_cam, VIDIOC_STREAMOFF, &pstr->buf_type);
-    app_info("ioctl,VIDIOC_STREAMOFF\n");
+    app_info("%s ioctl,VIDIOC_STREAMOFF\n",pstr->name);
 
 LABEL_EXIT:
     if (pstr->save) {
 	fclose(file);
-	c_info("file '%s%s' saved", pstr->prefix, pstr->postfix);
+	c_info("%s file '%s%s' saved",pstr->name, pstr->prefix, pstr->postfix);
     }
     pstr->ret = ret;
     return ret;

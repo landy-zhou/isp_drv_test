@@ -82,6 +82,11 @@ int fill_v4l2_fmt(struct v4l2_format *v4l2_fmt, int fmt_id, __u32 width, __u32 h
 	    v4l2_fmt->fmt.pix.pixelformat = f;
 	    break;
 	case V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE:
+	    v4l2_fmt->fmt.pix_mp.width = w;
+	    v4l2_fmt->fmt.pix_mp.height = h;
+	    v4l2_fmt->fmt.pix_mp.pixelformat = f;
+	    v4l2_fmt->fmt.pix_mp.num_planes = 2;	// Doesn't matters, driver should overwrite it with the preferred value
+	    break;
 	case V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE:
 	    v4l2_fmt->fmt.pix_mp.width = w;
 	    v4l2_fmt->fmt.pix_mp.height = h;
@@ -150,9 +155,11 @@ int fill_v4l2_buf(struct v4l2_buffer *buf, struct camera_stream_t *pcam, int ind
 		if (buf->memory == V4L2_MEMORY_DMABUF) {
 		    plane[i].m.fd		= pcam->dsc[index].dmabuf_fd;
 		    plane[i].data_offset	= baddr - pcam->dsc[index].addr;
+		    app_info("DMABUF plane[%d] data_offset %X",i,plane[i].data_offset);
 		}
 		bsize -= len;
 		baddr = (char *)baddr + len;
+		app_info("plane[%d],bsize=%d, baddr= %X",i,bsize,baddr);
 	    }
 	    plane[i].length		= bsize;
 	    if (buf->memory == V4L2_MEMORY_USERPTR) {
@@ -162,9 +169,14 @@ int fill_v4l2_buf(struct v4l2_buffer *buf, struct camera_stream_t *pcam, int ind
 	    if (buf->memory == V4L2_MEMORY_DMABUF) {
 		plane[i].m.fd		= pcam->dsc[index].dmabuf_fd;
 		plane[i].data_offset	= baddr - pcam->dsc[index].addr;
+		app_info("DMABUF plane[%d] data_offset %X",i,plane[i].data_offset);
 	    }
 	    buf->m.planes   = plane;
 	    buf->length     = fmt->fmt.pix_mp.num_planes;
+	    for(i=0;i<buf->length;i++)
+	    {
+	    	app_info("dump plane: plane[%d],fd 0x%X, data_offset 0x%X",i,buf->m.planes[i].m.fd,buf->m.planes[i].data_offset );
+	    }
 	    break;
 	default:
 	    return -2;
@@ -186,7 +198,7 @@ int SetStreamFmt(struct camera_stream_t *pstr)
     if (ret < 0)
 	return ret;
     ret = ioctl(pstr->fd_cam, VIDIOC_S_FMT, &StrFmt);
-	app_info("ioctl,VIDIOC_S_FMT\n");
+    app_info("ioctl,VIDIOC_S_FMT\n");
     if (ret  < 0)
     {
 	c_err("%s: set format failed: %s", pstr->name, strerror(errno));
@@ -238,33 +250,13 @@ int SetStreamFmt(struct camera_stream_t *pstr)
     /* allocate video buffer */
     for (i = 0; i < (int)buf_req.count; i++)
     {
-#if defined(USE_MMAP) 
-	struct v4l2_buffer v4l2_buf;
-	v4l2_buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	v4l2_buf.memory = V4L2_MEMORY_MMAP;
-	v4l2_buf.index = i;
-	if( ioctl(pstr->fd_cam, VIDIOC_QUERYBUF, &v4l2_buf)<0 )
-	{
-		c_err("failed querying buffer,%s \n",strerror(errno));
-		ret =-2;
-		goto LABEL_RELEASE_CAM_BUFFER;
-	 }
-	app_info("ioctl,VIDIOC_QUERYBUF\n");
-	addr = mmap (NULL, v4l2_buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, pstr->fd_cam, v4l2_buf.m.offset);
-	if (addr < 0) {
-	    c_err("failed mmap video buffer,%s \n",strerror(errno));
-	    ret = -7;
-	    goto LABEL_RELEASE_CAM_BUFFER;
-	}
-#else
 	addr = vb_alloc(size, &pstr->dsc[i].dmabuf_fd);
 	if (addr == NULL) {
 	    c_err("failed malloc video buffer,%s \n",strerror(errno));
 	    ret = -7;
 	    goto LABEL_RELEASE_CAM_BUFFER;
 	}
-#endif
-	
+
 	pstr->dsc[i].addr	= addr;
 	pstr->dsc[i].len	= size;
 
@@ -291,7 +283,7 @@ int SetStreamFmt(struct camera_stream_t *pstr)
 	    goto LABEL_RELEASE_CAM_BUFFER;
 	}
     }
-     app_info("ioctl,VIDIOC_QBUF\n");
+    app_info("ioctl,VIDIOC_QBUF\n");
 
     /* misc */
     if (pstr->save) {

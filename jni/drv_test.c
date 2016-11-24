@@ -306,14 +306,14 @@ int main(int argc, char **argv)
 	}
 	memset(in, 0, sizeof(in));
 	strcpy(in->name, "RAWInput");
-	strcpy(in->InputName, "640x480.raw10");
+	strcpy(in->InputName, "/bin/640x480.raw10");
 	in->NrFrame = 1;
 	in->buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-	in->fmt_id = FMT_ID_BG10;
+	in->fmt_id = FMT_ID_BA81;
 	in->width = 640;
 	in->height = 480;
 	in->NrBuf = 1;
-	in->load = 0;
+	in->load = 1;
 	in->fd_cam = in_fd;
     }
 
@@ -374,7 +374,7 @@ int main(int argc, char **argv)
 	    goto exit;
     }
 
-    sleep(10);
+    sleep(8);
 
     if (in)
 	CameraThreadKill(in);

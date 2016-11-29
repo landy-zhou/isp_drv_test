@@ -31,6 +31,7 @@ struct ctx_input {
     int outport;
     int output;
     int online;
+    int iommu;
 };
 
 int ParseArgs(struct ctx_input *top_ctx, int argc, char *argv[])
@@ -39,7 +40,7 @@ int ParseArgs(struct ctx_input *top_ctx, int argc, char *argv[])
     int ret;
 
     switch (argc) {
-	case 8:
+	case 9:
 	    if (!strcmp("-v", argv[1]))
 		top_ctx->online = 0;
 	    else
@@ -50,10 +51,11 @@ int ParseArgs(struct ctx_input *top_ctx, int argc, char *argv[])
 	    top_ctx->path = atoi(argv[5]);
 	    top_ctx->outport = atoi(argv[6]);
 	    top_ctx->output  = atoi(argv[7]);
-	    printf("%s %s %d %d %d %d %d %d\n",argv[0],argv[1],top_ctx->source,top_ctx->ccic,top_ctx->idi,top_ctx->path,top_ctx->outport,top_ctx->output);
+	    top_ctx->iommu  = atoi(argv[8]);
+	    printf("%s %s %d %d %d %d %d %d %d\n",argv[0],argv[1],top_ctx->source,top_ctx->ccic,top_ctx->idi,top_ctx->path,top_ctx->outport,top_ctx->output,top_ctx->iommu);
 	    break;
 	default:
-	    printf("usage: %s -v/-s <input_id> <ccic_id> <idi_id> <pipeline_id> <axiw_id> <output_id>\n", argv[0]);
+	    printf("usage: %s -v/-s <input_id> <ccic_id> <idi_id> <pipeline_id> <axiw_id> <output_id> <iommu_enable>\n", argv[0]);
 	    return -EINVAL;
     }
     return 0;
@@ -381,6 +383,7 @@ int main(int argc, char **argv)
 	    .NrBuf = 3,
 	    .NrFrame = 4,
 	    .save = 1,
+        .mmu_en = topology.iommu,
 	},
     };
     /* open video device */

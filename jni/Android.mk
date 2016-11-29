@@ -15,7 +15,8 @@ LOCAL_SRC_FILES := media_lib.c \
 		ovmem_ion.c \
 		vbmem_lib.c \
 		camera_api.c\
-		asr_isp_test.c
+		asr_isp_test.c\
+		isp_iommu.c
 
 LOCAL_LDFLAGS := -static
 

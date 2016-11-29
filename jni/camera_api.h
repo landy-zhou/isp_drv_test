@@ -75,6 +75,7 @@ struct camera_stream_t
 	char	postfix[IDENTIFIER_LENGTH];
 	char	InputName[IDENTIFIER_LENGTH];
 	int	ret;
+	int 	mmu_en;
 
 	/* handlers */
 	int	(*BeforeRun)(struct camera_stream_t *stream);

@@ -83,10 +83,7 @@ int CamRouteApply(struct CamNode *node, struct CamRoute *route, int flag)
     if (route->RefCnt == 0) {
 	ret = CamLinkApply(node, route->head, flag);
 	if (ret < 0) {
-	    app_err("failed to enable route '%s => %s': %s",
-		    route->src->me->info.name,
-		    route->dst->me->info.name,
-		    strerror(errno));
+	    app_err("failed to enable route '%s => %s': %s", route->src->me->info.name, route->dst->me->info.name, strerror(errno));
 	    goto disable;
 	}
 	if (route->more) {
@@ -192,6 +189,9 @@ static int CamNodeAddRoute(struct CamNode *node, struct CamLink *head, struct Ca
     node->route = realloc(node->route, (node->NrRoute + 1) * sizeof(*node->route));
     node->route[node->NrRoute] = route;
     node->NrRoute++;
+ 
+    app_info("added route3 '%s'==>'%s  NrRoute = %d'", route->src->name, route->dst->name, node->NrRoute);
+	
     return 0;
 }
 
@@ -419,12 +419,23 @@ static int CamNodeSetupRoute(struct CamNode *node)
 {
     int i, j, ret;
     if (node->NrRoute)
+    {
+	app_info("route already setup for %s,%d", node->name, node->NrRoute);
 	return node->NrRoute;
+    }
 
     for (i = 0; i < node->NrLink; i++) {
 	struct CamNode *dst = node->link[i]->dst;
 	if ((dst == NULL) || (dst == node))
+	{
+	    if(dst != NULL)
+		app_err("failed to setup route '%s'==>'%s'", node->name, dst->name);
+	    else
+		app_err("failed to setup route '%s'==> NULL", node->name);
 	    continue;
+	}
+	app_info("setup route '%s'==>'%s',link '%s'-->'%s', total links %d ", node->name, dst->name,node->link[i]->src->name, node->link[i]->dst->name,node->NrLink);
+
 	if (dst->level) {
 	    ret = CamNodeSetupRoute(dst);
 	    if (ret < 0)
@@ -432,16 +443,18 @@ static int CamNodeSetupRoute(struct CamNode *node)
 	    for (j = 0; j < dst->NrRoute; j++) {
 		ret = CamNodeAddRoute(node, node->link[i], dst->route[j]);
 		if (ret < 0) {
-		    app_err("failed to add route '%s'==>'%s'", node->name, dst->name);
+		    app_err("failed to add route1 '%s'==>'%s'", node->name, dst->name);
 		    return ret;
 		}
+		app_info("added route1 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
 	    }
 	} else {
 	    ret = CamNodeAddRoute(node, node->link[i], NULL);
 	    if (ret < 0) {
-		app_err("failed to add route '%s'=>'%s'", node->name, dst->name);
+		app_err("failed to add route2 '%s'=>'%s'", node->name, dst->name);
 		return ret;
 	    }
+		app_info("added route2 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
 	}
     }
     //debug info
@@ -464,11 +477,12 @@ static int MediaLibSearchRoute(struct PlatCam *cam)
 		goto exit_err;
 	}
     }
-    //find Links and push to stack
+    //recursion node source link to find all nodes,and update their level value only
     do {
 	struct CamNode *node = QPop;
 	if (node == NULL)
 	    break;
+	app_info("node %s level = %d",node->name,node->level);
 	for (j = 0; j < node->NrLink; j++) {
 	    struct CamNode *up = node->link[j]->src;
 	    if (up == node)
@@ -482,7 +496,9 @@ static int MediaLibSearchRoute(struct PlatCam *cam)
 	}
     } while(1);
     //setup Links as Routes
-    for (i = 0; i < cam->NrSrc; i++) {
+    //for (i = 0; i < cam->NrSrc; i++) {
+    for (i = 0; i < 1; i++) {
+	app_info("setup route for source %s ",cam->SrcPool[i]->name);
 	ret = CamNodeSetupRoute(cam->SrcPool[i]);
 	if (ret < 0)
 	    goto exit_err;
@@ -500,6 +516,7 @@ static int MediaLibSearchRoute(struct PlatCam *cam)
 	struct CamNode *node = QPop;
 	if (node == NULL)
 	    break;
+	app_info("node %s level = %d",node->name,node->level);
 	for (j = 0; j < node->NrLink; j++) {
 	    struct CamNode *up = node->link[j]->src;
 	    if (up == node)
@@ -513,6 +530,7 @@ static int MediaLibSearchRoute(struct PlatCam *cam)
 	}
     } while(1);
     for (i = 0; i < cam->NrPath; i++) {
+	app_info("setup route for path %s ",cam->PathPool[i]->name);
 	ret = CamNodeSetupRoute(cam->PathPool[i]);
 	if (ret < 0)
 	    goto exit_err;
@@ -822,7 +840,9 @@ int CameraContextInit(struct PlatCam *cam, int SrcID, int PathID, int NrDst)
 	return -EPERM;
 
     for (i = 0; i < cam->SrcPool[SrcID]->NrRoute; i++) {
-	if (cam->SrcPool[SrcID]->route[i]->dst == p_node)
+	//if (cam->SrcPool[SrcID]->route[i]->dst == p_node)
+	app_info("finding route from '%s' to '%s'", cam->SrcPool[SrcID]->name,cam->SrcPool[SrcID]->route[i]->dst->name);
+	if (!strcmp(cam->SrcPool[SrcID]->route[i]->dst->name,"ccic-csi #0"))
 	    goto find;
     }
     app_err("NO route find between '%s' and '%s'", cam->SrcPool[SrcID]->name, cam->PathPool[PathID]->name);

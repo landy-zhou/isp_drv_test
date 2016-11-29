@@ -221,7 +221,7 @@ static int media_enum_links(struct media_device *media)
 			free(links.links);
 			return -errno;
 		}
-		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
+		app_info("ioctl,MEDIA_IOC_ENUM_LINKS, get %d links\n",entity->info.links);	
 
 		for (i = 0; i < entity->info.pads; ++i) {
 			entity->pads[i].entity = entity;
@@ -238,7 +238,18 @@ static int media_enum_links(struct media_device *media)
 
 			source = media_get_entity_by_id(media, link->source.entity);
 			sink = media_get_entity_by_id(media, link->sink.entity);
-
+			/*
+			if(source != NULL)
+				media_dbg(media, "source %s \n", source->info.name);
+			if(source != NULL)
+				media_dbg(media, "sink %s \n", sink->info.name);
+			media_dbg(media,
+					  "entity %u link %u from %u/%u to %u/%u \n",
+					  id, i, link->source.entity,
+					  link->source.index,
+					  link->sink.entity,
+					  link->sink.index);	
+			*/
 			if (source == NULL || sink == NULL) {
 				media_dbg(media,
 					  "WARNING entity %u link %u from %u/%u to %u/%u is invalid!\n",
@@ -498,7 +509,7 @@ struct media_device *media_open_debug(
 	ret = media_enum_links(media);
 	if (ret < 0) {
 		media_dbg(media,
-			  "%s: Unable to enumerate pads and linksfor device %s\n",
+			  "%s: Unable to enumerate pads and links for device %s\n",
 			  __func__, name);
 		media_close(media);
 		return NULL;
@@ -509,7 +520,7 @@ struct media_device *media_open_debug(
 
 struct media_device *media_open(const char *name)
 {
-	return media_open_debug(name, NULL, NULL);
+	return media_open_debug(name, (void (*)(void *, ...))fprintf, stdout);
 }
 
 void media_close(struct media_device *media)

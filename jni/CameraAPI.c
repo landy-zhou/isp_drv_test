@@ -15,6 +15,7 @@
 #include "MediaLib.h"
 #include "CameraAPI.h"
 #include "vbmem_lib.h"
+#include "isp_iommu.h"
 
 //#define USE_USERPTR
 #define USE_DMABUF
@@ -217,6 +218,13 @@ int SetStreamFmt(struct camera_stream_t *pstr)
 	return -4;
     }
 
+    /* setup iommu    */
+    if(CamIommuInit(pstr->fd_cam, pstr->mmu_en))
+    {
+	c_err("can't init Iommu:%s", strerror(errno));
+	return -1;
+    }
+		
     /* request driver buffers */
     struct v4l2_requestbuffers buf_req;
     buf_req.type	= pstr->buf_type;

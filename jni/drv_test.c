@@ -34,6 +34,7 @@ struct ctx_input {
     char source;
     char path;
     char online:1;
+    char iommu;
 };
 
 
@@ -45,16 +46,17 @@ int ParseCmd(struct ctx_input *top_ctx, int argc, char *argv[])
     int ret;
 
     switch (argc) {
-	case 4:
+	case 5:
 	    if (!strcmp("-v", argv[1]))
 		top_ctx->online = 0;
 	    else
 		top_ctx->online = 1;
 	    top_ctx->source = atoi(argv[2]);
 	    top_ctx->path = atoi(argv[3]);
+	    top_ctx->iommu = atoi(argv[4]);
 	    break;
 	default:
-	    printf("usage: %s -v <input_id> <pipeline_id>\n    or %s -s <sensor_id> <pipeline_id>\n", argv[0], argv[0]);
+	    printf("usage: %s -v <input_id> <pipeline_id> <iommu_enable>\n    or %s -s <sensor_id> <pipeline_id> <iommu_enable>\n", argv[0], argv[0]);
 	    return -EINVAL;
     }
     return 0;
@@ -142,6 +144,7 @@ int main(int argc, char **argv)
 	    .NrBuf = 1,
 	    .NrFrame = 1,
 	    .save = 1,
+	    .mmu_en = topology.iommu,
 	},
 	[1] = {
 	    .name = {"OutputB"},
@@ -152,6 +155,7 @@ int main(int argc, char **argv)
 	    .NrBuf = 3,
 	    .NrFrame = 8,
 	    .save = 1,
+	    .mmu_en = topology.iommu,
 	},
 	[2] = {
 	    .name = {"OutputC"},
@@ -162,6 +166,7 @@ int main(int argc, char **argv)
 	    .NrBuf = 3,
 	    .NrFrame = 8,
 	    .save = 1,
+	    .mmu_en = topology.iommu,
 	},
 	[3] = {
 	    .name = {"OutputD"},
@@ -172,6 +177,7 @@ int main(int argc, char **argv)
 	    .NrBuf = 3,
 	    .NrFrame = 8,
 	    .save = 1,
+	    .mmu_en = topology.iommu,
 	},
     };
 #ifdef DUMPRAW
@@ -185,6 +191,7 @@ int main(int argc, char **argv)
 	    .NrBuf = 3,
 	    .NrFrame = 1,
 	    .save = 1,
+	    .mmu_en = topology.iommu,
 	},
     };
 #endif
@@ -315,6 +322,7 @@ int main(int argc, char **argv)
 	in->NrBuf = 1;
 	in->load = 1;
 	in->fd_cam = in_fd;
+	in->mmu_en = topology.iommu;
     }
 
     /* Create output V4L2 thread */

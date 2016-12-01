@@ -190,6 +190,15 @@ enum v4l2_priv_colorfx {
 #define VDEV_INPUT_5_NAME	"vin<"AQUILAV1_INPUT_5_NAME">"
 #define VDEV_INPUT_6_NAME	"vin<"AQUILAV1_INPUT_6_NAME">"
 
+#define V5216_SENSOR_OV8856_NAME	"sensor:ovt.ov8856"
+#define V5216_VCM_PDRV_NAME	"vcm-pdrv"
+#define V5216_FLASH_PDRV_NAME	"flash-pdrv"
+#define V5216_CCIC_CSI0_NAME	"ccic-csi #0"
+#define V5216_CCIC_DMA_NAME	"ccic-dma #0"
+//#define V5216_IDI1_NAME	"aquilav1isd-IDI1"
+//#define V5216_IDI2_NAME	"aquilav1isd-IDI2"
+
+
 /* the specific controls */
 #define V4L2_CID_PRIVATE_AF_MODE \
 	(V4L2_CID_CAMERA_CLASS_BASE + 0x1000)

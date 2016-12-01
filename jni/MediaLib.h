@@ -61,6 +61,9 @@ enum {
 	CAMNODE_FL_T_PATH,
 	CAMNODE_FL_T_POSTCROP,
 	CAMNODE_FL_T_OUTPUT,
+	CAMNODE_FL_T_CCIC,
+	CAMNODE_FL_T_IDI,
+	CAMNODE_FL_T_OUTPORT,
 	/* STATE flags */
 	CAMNODE_FL_S_OCCUPY,
 };
@@ -117,7 +120,7 @@ struct CamCtx {
 	long		flags;
 };
 
-#define SetContainer(g, h)	((g)->padding[0] = (__u32)h)
+#define SetContainer(g, h)	((g)->padding[0] = (__u32)h) 
 #define GetContainer(g)		((void *)((g)->padding[0]))
 
 /**************************** External Data Types ****************************/
@@ -133,6 +136,12 @@ struct PlatCam {
 	int			NrPath;
 	struct CamNode		*DstPool[ME_CNT];
 	int			NrDst;
+	struct CamNode		*CcicPool[ME_CNT];
+	int			NrCcic;
+	struct CamNode		*IdiPool[ME_CNT];
+	int			NrIdi;
+	struct CamNode		*OutportPool[ME_CNT];
+	int			NrOutport;
 	struct CamCtx		*ctx[CONTEXT_PER_PLATFORM];
 	int			NrCtx;
 	struct CamLink		*(*FindLink)(struct PlatCam *cam, struct CamNode *src, struct CamNode *dst);
@@ -175,12 +184,18 @@ int MediaLibEnumSource(struct PlatCam *cam, int idx, struct CamNodeEnum *desc);
 int MediaLibEnumPath(struct PlatCam *cam, int idx, struct CamNodeEnum *desc);
 
 enum {
-	PARAM_SRC_SET_COMBO = 0,
-	PARAM_SRC_GET_COMBO,
-	PARAM_CROP_SET_COMBO,
-	PARAM_CROP_GET_COMBO,
-	PARAM_PATH_SET_CROP,
-	PARAM_PATH_GET_CROP,	/* Beware! Change to above parameters may impact all linked down stream components */
+	PARAM_SENSOR_SET_FMT = 0,
+	PARAM_SENSOR_GET_FMT,
+	PARAM_CCIC_SET_COMBO,
+	PARAM_CCIC_GET_COMBO,
+	PARAM_IDI_SET_CROP,
+	PARAM_IDI_GET_CROP,
+	PARAM_PATH_SET_COMBO,
+	PARAM_PATH_GET_COMBO,	/* Beware! Change to above parameters may impact all linked down stream components */
+	PARAM_OUTPORT_SET_COMBO,
+	PARAM_OUTPORT_GET_COMBO,
+	PARAM_OUTPUT_SET_COMBO,
+	PARAM_OUTPUT_GET_COMBO,
 	PARAM_PATH_CMD_FLUSH,
 	PARAM_CNT,
 	PARAM_APPLY_FMT = 0,

@@ -22,6 +22,30 @@ static char *v5216_path_name[] = {
     V5216_PATH_PDNS_NAME,
     V5216_PATH_COMBINE_NAME
 };
+
+static char *v5216_ccic_name[] = {
+    V5216_CCIC_CSI0_NAME,
+    V5216_CCIC_DMA_NAME
+};
+
+static char *v5216_idi_name[] = {
+    V5216_IDI1_NAME,
+    V5216_IDI2_NAME
+};
+
+static char *v5216_outport_name[] = {
+    V5216_OUTPUT_1_NAME,
+    V5216_OUTPUT_2_NAME,
+    V5216_OUTPUT_3_NAME,
+    V5216_OUTPUT_4_NAME,
+    V5216_OUTPUT_5_NAME,
+    V5216_OUTPUT_6_NAME,
+    V5216_OUTPUT_7_NAME,
+    V5216_OUTPUT_8_NAME
+};
+
+
+
 #if 0
 int CamLinkUnitApply(struct CamNode *node, struct CamLinkUnit *unit, int flag)
 {
@@ -47,6 +71,7 @@ int CamLinkApply(struct CamNode *node, struct CamLink *link, int flag)
     if (flag == 0)
 	goto link_off;
     if (link->RefCnt == 0) {
+	app_info("try to enable link '%s => %s' ", link->mlink->source->entity->info.name,link->mlink->sink->entity->info.name);
 	ret = media_setup_link(node->me->media, link->mlink->source, link->mlink->sink, flag);
 	if (ret < 0) {
 	    app_err("failed to enable link '%s => %s': %s",
@@ -86,6 +111,7 @@ int CamRouteApply(struct CamNode *node, struct CamRoute *route, int flag)
 	    app_err("failed to enable route '%s => %s': %s", route->src->me->info.name, route->dst->me->info.name, strerror(errno));
 	    goto disable;
 	}
+	app_info("enabled route '%s => %s' ", route->src->me->info.name, route->dst->me->info.name);
 	if (route->more) {
 	    ret = CamRouteApply(route->head->dst, route->more, flag);
 	    if (ret < 0)
@@ -195,7 +221,7 @@ static int CamNodeAddRoute(struct CamNode *node, struct CamLink *head, struct Ca
     return 0;
 }
 
-static int CamNodeOpen(struct CamNode *node)
+int CamNodeOpen(struct CamNode *node)
 {
     if (node->OpenCnt == 0) {
 	node->me->fd = open(node->me->devname, O_RDWR | O_NONBLOCK);
@@ -208,7 +234,7 @@ static int CamNodeOpen(struct CamNode *node)
     return node->me->fd;
 }
 
-static int CamNodeClose(struct CamNode *node)
+int CamNodeClose(struct CamNode *node)
 {
     node->OpenCnt--;
     if (node->OpenCnt == 0) {
@@ -218,7 +244,33 @@ static int CamNodeClose(struct CamNode *node)
     return 0;
 }
 
-static int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
+static int CamNodeSetFmt(struct CamNode *node, struct v4l2_subdev_format *fmt)
+{
+	int i, ret = 0, fd;
+	fd = CamNodeOpen(node);
+	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_FMT, &fmt);
+	app_info("%s ioctl,VIDIOC_SUBDEV_S_FMT\n",node->name);
+	if (ret < 0) {
+	    app_err("Failed to set format '%s': %s", node->me->devname, strerror(errno));
+	}
+	CamNodeClose(node);
+	return ret;
+}
+
+static int CamNodeSetCrop(struct CamNode *node, struct v4l2_subdev_selection *sel)
+{
+    int i, ret = 0, fd;
+    fd = CamNodeOpen(node);
+    ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_SELECTION, &sel);
+    app_info("%s, ioctl,VIDIOC_SUBDEV_S_SELECTION\n",node->name);
+    if (ret < 0) {
+		app_err("Failed to set selection '%s': %s", node->me->devname, strerror(errno));
+    }
+    CamNodeClose(node);
+	return ret;
+}
+
+int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 {
     int i, ret = 0, fd;
 
@@ -234,7 +286,7 @@ static int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 	    .r	= combo->CropWnd,
 	};
 	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_SELECTION, &sel);
-	app_info("ioctl,VIDIOC_SUBDEV_S_SELECTION\n");
+	app_info("%s, ioctl,VIDIOC_SUBDEV_S_SELECTION\n",node->name);
 	if (ret < 0) {
 	    app_err("MediaLib failed to set selection '%s': %s", node->me->devname, strerror(errno));
 	    goto exit;
@@ -255,7 +307,7 @@ static int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 	    },
 	};
 	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_FMT, &fmt);
-	app_info("ioctl,VIDIOC_SUBDEV_G_SELECTION\n");
+	app_info("%s ioctl,VIDIOC_SUBDEV_S_FMT\n",node->name);
 	if (ret < 0) {
 	    app_err("MediaLib failed to set format '%s': %s", node->me->devname, strerror(errno));
 	    ret = -errno;
@@ -264,7 +316,7 @@ static int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 	combo->width = fmt.format.width;
 	combo->height = fmt.format.height;
 	combo->code = fmt.format.code;
-
+#if 0
 	/* only sync format with downstream subdev */
 	if (node->me->pads[combo->pad].flags & MEDIA_PAD_FL_SINK)
 	    goto done;
@@ -291,6 +343,7 @@ static int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 		goto exit;
 	    }
 	}
+#endif //0
 done:
 	;
     }
@@ -345,7 +398,7 @@ exit:
     return ret;
 }
 
-static int CamNodeSetCtrl(struct CamNode *node, struct CamCtx *ctx)
+int CamNodeSetCtrl(struct CamNode *node, struct CamCtx *ctx)
 {
     int i, ret = 0, fd;
 
@@ -354,9 +407,9 @@ static int CamNodeSetCtrl(struct CamNode *node, struct CamCtx *ctx)
 	return fd;
 
     ret = ioctl(fd, VIDIOC_PRIVATE_AQUILAV1ISP_TOPOLOGY_SNAPSHOT, ctx);
-    app_info("ioctl,VIDIOC_PRIVATE_AQUILAV1ISP_TOPOLOGY_SNAPSHOT\n");
+    app_info("%s ioctl,VIDIOC_PRIVATE_AQUILAV1ISP_TOPOLOGY_SNAPSHOT\n",node->name);
     if (ret < 0) {
-	app_err("MediaLib failed to trigger topology snapshot for context '%s' => '%s': %s", ctx->src->name, ctx->path->name, strerror(errno));
+	app_err("MediaLib failed to trigger topology snapshot for context '%s' : %s", node->name, strerror(errno));
 	ret = -errno;
 	goto exit;
     }
@@ -440,13 +493,14 @@ static int CamNodeSetupRoute(struct CamNode *node)
 	    ret = CamNodeSetupRoute(dst);
 	    if (ret < 0)
 		return ret;
-	    for (j = 0; j < dst->NrRoute; j++) {
-		ret = CamNodeAddRoute(node, node->link[i], dst->route[j]);
+	   // for (j = 0; j < dst->NrRoute; j++) {
+		//ret = CamNodeAddRoute(node, node->link[i], dst->route[j]);
+		ret = CamNodeAddRoute(node, node->link[i],NULL);
 		if (ret < 0) {
 		    app_err("failed to add route1 '%s'==>'%s'", node->name, dst->name);
 		    return ret;
-		}
-		app_info("added route1 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
+		//}
+		//app_info("added route1 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
 	    }
 	} else {
 	    ret = CamNodeAddRoute(node, node->link[i], NULL);
@@ -454,7 +508,7 @@ static int CamNodeSetupRoute(struct CamNode *node)
 		app_err("failed to add route2 '%s'=>'%s'", node->name, dst->name);
 		return ret;
 	    }
-		app_info("added route2 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
+		//app_info("added route2 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
 	}
     }
     //debug info
@@ -592,25 +646,39 @@ struct PlatCam *MediaLibInit()
 	}
     }
 
-    /* Identify Source, Path, Output among all Nodes */
-    ret = MediaLibFindSource(cam);
+    /* Identify node types among all Nodes */
+    ret = MediaLibFindSource(cam); //sensors or offline input
     if (ret < 0)
 	goto out;
 
-    ret = MediaLibFindPath(cam); //isp pipelines or other paths
+    ret = MediaLibFindPath(cam); //isp pipeline
     if (ret < 0)
 	goto out;
 
-    ret = MediaLibFindDst(cam);
+    ret = MediaLibFindDst(cam); //output video device
     if (ret < 0)
 	goto out;
 
+    ret = MediaLibFindCCIC(cam); //ccic
+    if (ret < 0)
+	goto out;
+	
+    ret = MediaLibFindIDI(cam); //idi 
+    if (ret < 0)
+	goto out;
+
+    ret = MediaLibFindOutport(cam); //axi output port
+    if (ret < 0)
+		goto out;
+	
+#if 0
     ret = MediaLibSearchRoute(cam);
     if (ret < 0)
     {
 	app_err("MediaLibSearchRoute error\n");
 	goto out;
     }
+#endif
     /* This is just a W/R to retain power status */
     {
 	int sid;
@@ -740,6 +808,67 @@ skip:;
     return cam->NrSrc;
 }
 
+
+int MediaLibFindCCIC(struct PlatCam *cam)
+{
+    unsigned int i, ret;
+
+    for (i = 0; i < sizeof(v5216_ccic_name)/sizeof(v5216_ccic_name[0]); i++) {
+	struct media_entity *me = media_get_entity_by_name(cam->media, v5216_ccic_name[i], strlen(v5216_ccic_name[i]));
+	struct CamNode *node;
+	if (me == NULL)
+	    continue;
+	node = GetContainer(me);
+	if (node == NULL)
+	    continue;
+	SetFlag(node, CAMNODE_FL_T_CCIC);
+	app_info("Find ccic %d: %s", cam->NrCcic, node->name);
+	cam->CcicPool[cam->NrCcic] = node;
+	cam->NrCcic++;
+    }
+    return cam->NrCcic;
+}
+
+int MediaLibFindIDI(struct PlatCam *cam)
+{
+    unsigned int i, ret;
+
+    for (i = 0; i < sizeof(v5216_idi_name)/sizeof(v5216_idi_name[0]); i++) {
+	struct media_entity *me = media_get_entity_by_name(cam->media, v5216_idi_name[i], strlen(v5216_idi_name[i]));
+	struct CamNode *node;
+	if (me == NULL)
+	    continue;
+	node = GetContainer(me);
+	if (node == NULL)
+	    continue;
+	SetFlag(node, CAMNODE_FL_T_IDI);
+	app_info("Find idi %d: %s", cam->NrIdi, node->name);
+	cam->IdiPool[cam->NrIdi] = node;
+	cam->NrIdi++;
+    }
+    return cam->NrIdi;
+}
+
+int MediaLibFindOutport(struct PlatCam *cam)
+{
+    unsigned int i, ret;
+
+    for (i = 0; i < sizeof(v5216_outport_name)/sizeof(v5216_outport_name[0]); i++) {
+	struct media_entity *me = media_get_entity_by_name(cam->media, v5216_outport_name[i], strlen(v5216_outport_name[i]));
+	struct CamNode *node;
+	if (me == NULL)
+	    continue;
+	node = GetContainer(me);
+	if (node == NULL)
+	    continue;
+	SetFlag(node, CAMNODE_FL_T_OUTPORT);
+	app_info("Find outport %d: %s", cam->NrOutport, node->name);
+	cam->OutportPool[cam->NrOutport] = node;
+	cam->NrOutport++;
+    }
+    return cam->NrIdi;
+}
+
 int MediaLibFindPath(struct PlatCam *cam)
 {
     unsigned int i, ret;
@@ -865,7 +994,8 @@ ctx_ready:
     ctx->route = route;
     ctx->flags = 0;
     ctx->src = route->src;
-    ctx->path = route->dst;
+    ctx->path = p_node;
+    //ctx->path = route->dst;
     while (route->head->dst != ctx->path)
 	route = route->more;
     ctx->crop = route->head->src;
@@ -919,6 +1049,7 @@ exit_err:
     return ret;
 }
 
+#if 0
 int CameraContextPara(struct PlatCam *cam, int CtxID, struct CamCtxParam *ParamList, int NrParam)
 {
     struct CamCtx *ctx;
@@ -955,6 +1086,7 @@ int CameraContextPara(struct PlatCam *cam, int CtxID, struct CamCtxParam *ParamL
 		route = ctx->out[0];
 		obj = ctx->path;
 find_pad:
+		app_info("find pad, node obj %s ", obj->name);
 		/* find successive node, and connecting pad */
 		while (route && route->src != obj)
 		    route = route->more;
@@ -1001,6 +1133,7 @@ apply_cmd:
 exit:
     return ret;
 }
+#endif
 
 int CameraContextKill(struct PlatCam *cam, int CtxID)
 {

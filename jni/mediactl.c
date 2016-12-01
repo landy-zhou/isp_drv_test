@@ -221,7 +221,7 @@ static int media_enum_links(struct media_device *media)
 			free(links.links);
 			return -errno;
 		}
-		app_info("ioctl,MEDIA_IOC_ENUM_LINKS, get %d links\n",entity->info.links);	
+		app_info("ioctl,MEDIA_IOC_ENUM_LINKS, get %d links",entity->info.links);	
 
 		for (i = 0; i < entity->info.pads; ++i) {
 			entity->pads[i].entity = entity;
@@ -403,7 +403,7 @@ static int media_enum_entities(struct media_device *media)
 		entity->media = media;
 
 		ret = ioctl(media->fd, MEDIA_IOC_ENUM_ENTITIES, &entity->info);
-		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
+		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES");
 		if (ret < 0) {
 			ret = errno != EINVAL ? -errno : 0;
 			break;

@@ -1,3 +1,7 @@
+/******************************************************************************
+ * (C) Copyright [2016] ASR International Ltd.
+ * All Rights Reserved
+******************************************************************************/
 
 #include <stdio.h>
 #include <unistd.h>
@@ -8,7 +12,7 @@
 #include <sys/mman.h>
 #include "ion.h"	
 #include "ovmem.h"	
-#include "MediaLib.h"
+#include "media_lib.h"
 
 static int ovm_device_fd = -ENOENT;
 static pthread_mutex_t ovm_mutex = PTHREAD_MUTEX_INITIALIZER;

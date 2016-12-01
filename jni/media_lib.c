@@ -1,47 +1,52 @@
-#include <linux/v5216_api.h>
+/******************************************************************************
+ * (C) Copyright [2016] ASR International Ltd.
+ * All Rights Reserved
+******************************************************************************/
+
+#include <linux/v5628_api.h>
 #include <linux/v4l2-subdev.h>
-#include "MediaLib.h"
+#include "media_lib.h"
 
 int MediaLibFindSource(struct PlatCam *cam);
 int MediaLibFindPath(struct PlatCam *cam);
 int MediaLibFindDst(struct PlatCam *cam);
 
-static char *v5216_path_name[] = {
-    V5216_PATH_YUV_1_NAME,
-    V5216_PATH_RAW_1_NAME,
-    V5216_PATH_M2M_1_NAME,
-    V5216_PATH_YUV_2_NAME,
-    V5216_PATH_RAW_2_NAME,
-    V5216_PATH_M2M_2_NAME,
-    V5216_PATH_COMBINE_NAME,
-    V5216_PATH_HIGHSPEED_NAME,  
-    V5216_PATH_HDRPROCESS_NAME,
-    V5216_PATH_3DSTEREO_NAME,
-    V5216_PATH_YUVOFFLINE1_NAME,
-    V5216_PATH_YUVOFFLINE2_NAME,
-    V5216_PATH_PDNS_NAME,
-    V5216_PATH_COMBINE_NAME
+static char *v5628_path_name[] = {
+    V5628_PATH_YUV_1_NAME,
+    V5628_PATH_RAW_1_NAME,
+    V5628_PATH_M2M_1_NAME,
+    V5628_PATH_YUV_2_NAME,
+    V5628_PATH_RAW_2_NAME,
+    V5628_PATH_M2M_2_NAME,
+    V5628_PATH_COMBINE_NAME,
+    V5628_PATH_HIGHSPEED_NAME,  
+    V5628_PATH_HDRPROCESS_NAME,
+    V5628_PATH_3DSTEREO_NAME,
+    V5628_PATH_YUVOFFLINE1_NAME,
+    V5628_PATH_YUVOFFLINE2_NAME,
+    V5628_PATH_PDNS_NAME,
+    V5628_PATH_COMBINE_NAME
 };
 
-static char *v5216_ccic_name[] = {
-    V5216_CCIC_CSI0_NAME,
-    V5216_CCIC_DMA_NAME
+static char *v5628_ccic_name[] = {
+    V5628_CCIC_CSI0_NAME,
+    V5628_CCIC_DMA_NAME
 };
 
-static char *v5216_idi_name[] = {
-    V5216_IDI1_NAME,
-    V5216_IDI2_NAME
+static char *v5628_idi_name[] = {
+    V5628_IDI1_NAME,
+    V5628_IDI2_NAME
 };
 
-static char *v5216_outport_name[] = {
-    V5216_OUTPUT_1_NAME,
-    V5216_OUTPUT_2_NAME,
-    V5216_OUTPUT_3_NAME,
-    V5216_OUTPUT_4_NAME,
-    V5216_OUTPUT_5_NAME,
-    V5216_OUTPUT_6_NAME,
-    V5216_OUTPUT_7_NAME,
-    V5216_OUTPUT_8_NAME
+static char *v5628_outport_name[] = {
+    V5628_OUTPUT_1_NAME,
+    V5628_OUTPUT_2_NAME,
+    V5628_OUTPUT_3_NAME,
+    V5628_OUTPUT_4_NAME,
+    V5628_OUTPUT_5_NAME,
+    V5628_OUTPUT_6_NAME,
+    V5628_OUTPUT_7_NAME,
+    V5628_OUTPUT_8_NAME
 };
 
 
@@ -686,7 +691,7 @@ struct PlatCam *MediaLibInit()
 	struct CamNode *node;
 
 	/* retain ISP power */
-	me = media_get_entity_by_name(cam->media, V5216_IDI1_NAME, strlen(V5216_IDI1_NAME));
+	me = media_get_entity_by_name(cam->media, V5628_IDI1_NAME, strlen(V5628_IDI1_NAME));
 	if (me == NULL) {
 	    app_err("media_get_entity_by_name error\n");
 	    ret = -ENODEV;
@@ -752,7 +757,7 @@ void MediaLibExit(struct PlatCam *cam)
 	  }*/
 
 	/* relax ISP power */
-	me = media_get_entity_by_name(cam->media, V5216_IDI1_NAME, strlen(V5216_IDI1_NAME));
+	me = media_get_entity_by_name(cam->media, V5628_IDI1_NAME, strlen(V5628_IDI1_NAME));
 	if (me) {
 	    node = GetContainer(me);
 	    if (node)
@@ -813,8 +818,8 @@ int MediaLibFindCCIC(struct PlatCam *cam)
 {
     unsigned int i, ret;
 
-    for (i = 0; i < sizeof(v5216_ccic_name)/sizeof(v5216_ccic_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5216_ccic_name[i], strlen(v5216_ccic_name[i]));
+    for (i = 0; i < sizeof(v5628_ccic_name)/sizeof(v5628_ccic_name[0]); i++) {
+	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_ccic_name[i], strlen(v5628_ccic_name[i]));
 	struct CamNode *node;
 	if (me == NULL)
 	    continue;
@@ -833,8 +838,8 @@ int MediaLibFindIDI(struct PlatCam *cam)
 {
     unsigned int i, ret;
 
-    for (i = 0; i < sizeof(v5216_idi_name)/sizeof(v5216_idi_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5216_idi_name[i], strlen(v5216_idi_name[i]));
+    for (i = 0; i < sizeof(v5628_idi_name)/sizeof(v5628_idi_name[0]); i++) {
+	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_idi_name[i], strlen(v5628_idi_name[i]));
 	struct CamNode *node;
 	if (me == NULL)
 	    continue;
@@ -853,8 +858,8 @@ int MediaLibFindOutport(struct PlatCam *cam)
 {
     unsigned int i, ret;
 
-    for (i = 0; i < sizeof(v5216_outport_name)/sizeof(v5216_outport_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5216_outport_name[i], strlen(v5216_outport_name[i]));
+    for (i = 0; i < sizeof(v5628_outport_name)/sizeof(v5628_outport_name[0]); i++) {
+	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_outport_name[i], strlen(v5628_outport_name[i]));
 	struct CamNode *node;
 	if (me == NULL)
 	    continue;
@@ -873,8 +878,8 @@ int MediaLibFindPath(struct PlatCam *cam)
 {
     unsigned int i, ret;
 
-    for (i = 0; i < sizeof(v5216_path_name)/sizeof(v5216_path_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5216_path_name[i], strlen(v5216_path_name[i]));
+    for (i = 0; i < sizeof(v5628_path_name)/sizeof(v5628_path_name[0]); i++) {
+	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_path_name[i], strlen(v5628_path_name[i]));
 	struct CamNode *node;
 	if (me == NULL)
 	    continue;

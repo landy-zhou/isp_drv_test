@@ -1,3 +1,8 @@
+/******************************************************************************
+ * (C) Copyright [2016] ASR International Ltd.
+ * All Rights Reserved
+******************************************************************************/
+
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -12,8 +17,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "MediaLib.h"
-#include "CameraAPI.h"
+#include <linux/v5628_api.h>
+#include "media_lib.h"
+#include "camera_api.h"
 //#define DUMPRAW
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
@@ -84,15 +90,78 @@ exit:
     return ret;
 }
 
+int MediaEnablePipelineLinks(struct PlatCam *pcam,struct ctx_input *topology)
+{
+    struct CamNode *match_src,*match_dst;
+    int ret = 0;
+
+    //src-->ccic
+    if((topology->source>=0)&&(topology->ccic>=0))
+    {
+	match_src = pcam->SrcPool[topology->source];
+	match_dst = pcam->CcicPool[topology->ccic];
+	ret = MediaSetupLink(match_src,match_dst);
+	if(0>ret)
+	{
+	    goto out;
+	}
+    }
+    //ccic-->idi
+    if((topology->ccic>=0)&&(topology->idi>=0))
+    {
+	match_src = pcam->CcicPool[topology->ccic];
+	match_dst = pcam->IdiPool[topology->idi];
+	ret = MediaSetupLink(match_src,match_dst);
+	if(0>ret)
+	{
+	    goto out;
+	}
+    }
+    //idi-->path
+    if((topology->idi>=0)&&(topology->path>=0))
+    {
+	match_src = pcam->IdiPool[topology->idi];
+	match_dst = pcam->PathPool[topology->path];
+	ret = MediaSetupLink(match_src,match_dst);
+	if(0>ret)
+	{
+	    goto out;
+	}
+    }
+    //path-->outport
+    if((topology->path>=0)&&(topology->outport>=0))
+    {
+	match_src = pcam->PathPool[topology->path];
+	match_dst = pcam->OutportPool[topology->outport];
+	ret = MediaSetupLink(match_src,match_dst);
+	if(0>ret)
+	{
+	    goto out;
+	}
+    }
+    //outport-->output
+    if((topology->outport>=0)&&(topology->output>=0))
+    {
+	match_src = pcam->OutportPool[topology->outport];
+	match_dst = pcam->DstPool[topology->output];
+	ret = MediaSetupLink(match_src,match_dst);
+	if(0>ret)
+	{
+	    goto out;
+	}
+    }
+out:
+    return ret;
+}
+
 
 int main(int argc, char **argv)
 {
     struct PlatCam *pcam;
     int i,j,ret = -1;
     int out_fd, in_fd;
-
     struct ctx_input topology;
-    struct CamNode *match_src,*match_dst;
+
     //enum nodes, prepare links, setup media lib
     pcam = MediaLibInit();
     if (pcam == NULL)
@@ -103,68 +172,15 @@ int main(int argc, char **argv)
 	return ret;
 
     //enable media links to setup video route
-    //src-->ccic
-    if((topology.source>=0)&&(topology.ccic>=0))
-    {
-	match_src = pcam->SrcPool[topology.source];
-	match_dst = pcam->CcicPool[topology.ccic];
-	ret = MediaSetupLink(match_src,match_dst);
-	if(0>ret)
-	{
-	    goto out;
-	}
-    }
-    //ccic-->idi
-    if((topology.ccic>=0)&&(topology.idi>=0))
-    {
-	match_src = pcam->CcicPool[topology.ccic];
-	match_dst = pcam->IdiPool[topology.idi];
-	ret = MediaSetupLink(match_src,match_dst);
-	if(0>ret)
-	{
-	    goto out;
-	}
-    }
-    //idi-->path
-    if((topology.idi>=0)&&(topology.path>=0))
-    {
-	match_src = pcam->IdiPool[topology.idi];
-	match_dst = pcam->PathPool[topology.path];
-	ret = MediaSetupLink(match_src,match_dst);
-	if(0>ret)
-	{
-	    goto out;
-	}
-    }
-    //path-->outport
-    if((topology.path>=0)&&(topology.outport>=0))
-    {
-	match_src = pcam->PathPool[topology.path];
-	match_dst = pcam->OutportPool[topology.outport];
-	ret = MediaSetupLink(match_src,match_dst);
-	if(0>ret)
-	{
-	    goto out;
-	}
-    }
-    //outport-->output
-    if((topology.outport>=0)&&(topology.output>=0))
-    {
-	match_src = pcam->OutportPool[topology.outport];
-	match_dst = pcam->DstPool[topology.output];
-	ret = MediaSetupLink(match_src,match_dst);
-	if(0>ret)
-	{
-	    goto out;
-	}
-    }
+    MediaEnablePipelineLinks(pcam,&topology);
+
 
     /* set format & crop */
     if (topology.online) {
 
 	struct CamNodeFmtCombo SensorCfg = {
 	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
-	    //	.pad	= 0,
+	    .pad	= 0,
 	    .width	= 3264,
 	    .height	= 2448,
 	    .code	= V4L2_MBUS_FMT_SBGGR10_1X10,
@@ -181,8 +197,9 @@ int main(int argc, char **argv)
 		.scope	= (1 << PARAM_APPLY_CROP),
 		};
 		*/
-	struct CamNodeFmtCombo IdiCfg = {
+	struct CamNodeFmtCombo IdiCfgIn = {
 	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
+	    .pad	= AQUILAV1PAD_IDI_IN,
 	    .CropWnd = {	// For Output <t,l,w,h>
 		.left	= 0,
 		.top	= 0,
@@ -194,9 +211,23 @@ int main(int argc, char **argv)
 	    .code	= V4L2_MBUS_FMT_SBGGR10_1X10,
 	    .scope	= (1 << PARAM_APPLY_CROP) ,
 	};
-	struct CamNodeFmtCombo PathCfg = {
+	struct CamNodeFmtCombo IdiCfgOut = {
 	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
-	    //	.pad	= 1,
+	     .pad	= AQUILAV1PAD_IDI_PIPE1,
+	    .CropWnd = {	// For Output <t,l,w,h>
+		.left	= 0,
+		.top	= 0,
+		.width	= 3264,
+		.height	= 2448,
+	    },
+	    .width	= 3264,	
+	    .height	= 2448,
+	    .code	= V4L2_MBUS_FMT_SBGGR10_1X10,
+	    .scope	= (1 << PARAM_APPLY_CROP) ,
+	};
+	struct CamNodeFmtCombo PathCfgIn = {
+	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
+	    .pad	= AQUILAV1PAD_PIPE_IN,
 	    .CropWnd = {
 		.left	= 0,
 		.top	= 0,
@@ -208,14 +239,42 @@ int main(int argc, char **argv)
 	    //.code	= V4L2_MBUS_FMT_NV12_1X12,
 	    .scope	= (1 << PARAM_APPLY_CROP)|(1 << PARAM_APPLY_FMT),
 	};
-	struct CamNodeFmtCombo OutportCfg = {
+	struct CamNodeFmtCombo PathCfgOut = {
 	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
-	    //	.pad	= 1,
+	    .pad	= AQUILAV1PAD_PIPE_OUT,
+	    .CropWnd = {
+		.left	= 0,
+		.top	= 0,
+		.width	= 3264,
+		.height	= 2448,
+	    },
+	    .width	= 3264,
+	    .height	= 2448,
+	    //.code	= V4L2_MBUS_FMT_NV12_1X12,
+	    .scope	= (1 << PARAM_APPLY_CROP)|(1 << PARAM_APPLY_FMT),
+	};
+	struct CamNodeFmtCombo OutportCfgIn = {
+	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
+	    .pad	= AQUILAV1PAD_AXI_IN,
 	    .CropWnd = {
 		.left	= 0,
 		.top	= 0,
 		.width	= 3264,	
 		.height	= 2448,
+	    },
+	    .code	= V4L2_MBUS_FMT_NV12_1X12,
+	    .width	= 3264,
+	    .height	= 2448,
+	    .scope	= (1 << PARAM_APPLY_CROP)|(1 << PARAM_APPLY_FMT),
+	};
+	struct CamNodeFmtCombo OutportCfgOut = {
+	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
+	    .pad	= AQUILAV1PAD_AXI_OUT,
+	    .CropWnd = {
+		.left	= 0,
+		.top	= 0,
+		.width	= 640,	
+		.height	= 480,
 	    },
 	    .code	= V4L2_MBUS_FMT_NV12_1X12,
 	    .width	= 640,
@@ -246,15 +305,27 @@ int main(int argc, char **argv)
 		    */
 	    {
 		.ParamName	= PARAM_IDI_SET_CROP,
-		.ParamArg	= &IdiCfg,
+		.ParamArg	= &IdiCfgIn,
+	    },
+	    {
+		.ParamName	= PARAM_IDI_SET_CROP,
+		.ParamArg	= &IdiCfgOut,
 	    },
 	    {
 		.ParamName	= PARAM_PATH_SET_COMBO,
-		.ParamArg	= &PathCfg,
+		.ParamArg	= &PathCfgIn,
+	    },
+	    {
+		.ParamName	= PARAM_PATH_SET_COMBO,
+		.ParamArg	= &PathCfgOut,
 	    },
 	    {
 		.ParamName	= PARAM_OUTPORT_SET_COMBO,
-		.ParamArg	= &OutportCfg,
+		.ParamArg	= &OutportCfgIn,
+	    },
+	    {
+		.ParamName	= PARAM_OUTPORT_SET_COMBO,
+		.ParamArg	= &OutportCfgOut,
 	    },
 	    /*	    {
 		    .ParamName	= PARAM_OUTPUT_SET_COMBO,
@@ -307,10 +378,10 @@ int main(int argc, char **argv)
 	    .width = 640,
 	    .height = 480,
 	    .fmt_id = FMT_ID_NV12,
-	    .NrBuf = 1,
-	    .NrFrame = 1,
+	    .NrBuf = 3,
+	    .NrFrame = 4,
 	    .save = 1,
-	}
+	},
     };
     /* open video device */
     out_fd = CamNodeOpen(pcam->DstPool[topology.output]);
@@ -318,17 +389,17 @@ int main(int argc, char **argv)
 	goto out;
     out_stream[0].fd_cam = out_fd;
     /* set video device format */
-    ret = SetStreamFmt(out_stream[0]);
+    ret = SetStreamFmt(&out_stream[0]);
     if (ret < 0) {
 	c_err("%s: failed to setup stream format", out_stream[0].name);
 	goto exit;
     }
-    ret = CameraThreadCreate(out_stream[0]);
+    ret = CameraThreadCreate(&out_stream[0]);
     if (ret < 0)
 	goto exit;
 
-    sleep(3);
-    CameraThreadKill(out_stream[0]);
+    sleep(3*out_stream[0].NrFrame);
+    CameraThreadKill(&out_stream[0]);
 
 exit:
     CamNodeClose(pcam->DstPool[topology.output]);

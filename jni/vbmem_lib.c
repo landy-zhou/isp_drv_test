@@ -1,3 +1,8 @@
+/******************************************************************************
+ * (C) Copyright [2016] ASR International Ltd.
+ * All Rights Reserved
+******************************************************************************/
+
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -1,3 +1,8 @@
+/******************************************************************************
+ * (C) Copyright [2016] ASR International Ltd.
+ * All Rights Reserved
+******************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,8 +17,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "MediaLib.h"
-#include "CameraAPI.h"
+#include "media_lib.h"
+#include "camera_api.h"
 #include "vbmem_lib.h"
 
 //#define USE_USERPTR
@@ -366,8 +371,10 @@ int ContextRun(struct camera_stream_t *pstr)
     int len = 0;
     int ret = 0;
 
-    __u32 i;
-    __u64 count;
+    int i;
+    int count;
+    //__u32 i;
+   // __u64 count;
     struct v4l2_buffer cam_buffer;
     struct pollfd cam_ufds = {
 	.fd = pstr->fd_cam,
@@ -375,10 +382,10 @@ int ContextRun(struct camera_stream_t *pstr)
     };
     FILE *file;
 
-    if (pstr->NrFrame == ~0)
-	count = ~0;
-    else
-	count = pstr->NrFrame;
+    //if (pstr->NrFrame == ~0)
+//	count = ~0;
+ //   else
+    app_info("NrFrame %d\n",pstr->NrFrame);
 
     if (pstr->save) {
 	char FileName[FILE_NAME_LENGTH];
@@ -401,7 +408,7 @@ int ContextRun(struct camera_stream_t *pstr)
 
     // Now we start the real thing
     ret = ioctl(pstr->fd_cam, VIDIOC_STREAMON, &pstr->buf_type);
-    app_info("%s ioctl,VIDIOC_STREAMON,total frame number %d\n",pstr->name,count);
+    app_info("%s ioctl,VIDIOC_STREAMON,total frame number %d\n",pstr->name,pstr->NrFrame);
     if (ret < 0)
     {
 	c_err("%s: streamon failed: %s", pstr->name, strerror(errno));
@@ -409,7 +416,7 @@ int ContextRun(struct camera_stream_t *pstr)
     };
 
     sleep(1);
-    for (i = 0; i < count; i++)
+    for (i = 0; i < pstr->NrFrame; i++)
     {
 	if (pstr->kill)
 	    break;

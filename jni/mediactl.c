@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "options.h"
+//#include "options.h"
 
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -39,7 +39,7 @@
 
 #include "mediactl.h"
 #include "tools.h"
-#include "MediaLib.h"
+#include "media_lib.h"
 
 
 struct media_pad *media_entity_remote_source(struct media_pad *pad)

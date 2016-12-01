@@ -8,14 +8,14 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS += -Wno-missing-braces --sysroot=/home/qiangzhou/Android/Sdk/ndk-bundle/platforms/android-21/arch-arm64
 LOCAL_C_INCLUDES := $(LOCAL_PATH)//include/uapi
 
-LOCAL_SRC_FILES := MediaLib.c \
+LOCAL_SRC_FILES := media_lib.c \
 		v4l2subdev.c \
 		mediactl.c \
 		ion.c \
-		ovmem-ion.c \
+		ovmem_ion.c \
 		vbmem_lib.c \
-		CameraAPI.c\
-		drv_test.c
+		camera_api.c\
+		asr_isp_test.c
 
 LOCAL_LDFLAGS := -static
 

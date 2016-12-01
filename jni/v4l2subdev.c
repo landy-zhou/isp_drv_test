@@ -35,7 +35,7 @@
 #include <linux/v4l2-subdev.h>
 
 #include "mediactl.h"
-#include "tools.h"
+//#include "tools.h"
 #include "v4l2subdev.h"
 
 int v4l2_subdev_open(struct media_entity *entity)

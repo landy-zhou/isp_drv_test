@@ -379,7 +379,7 @@ int main(int argc, char **argv)
 	    .height = 480,
 	    .fmt_id = FMT_ID_NV12,
 	    .NrBuf = 3,
-	    .NrFrame = 4,
+	    .NrFrame = 3,
 	    .save = 1,
 	},
     };
@@ -398,7 +398,7 @@ int main(int argc, char **argv)
     if (ret < 0)
 	goto exit;
 
-    sleep(3*out_stream[0].NrFrame);
+    sleep(3);
     CameraThreadKill(&out_stream[0]);
 
 exit:

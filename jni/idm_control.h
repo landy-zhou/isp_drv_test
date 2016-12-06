@@ -49,7 +49,7 @@ enum idm_subdev_code {
 };
 
 enum idm_vnode_code {
-    VNODE_ISP_A1W1,
+    VNODE_ISP_A1W1 = 0,
     VNODE_ISP_A1W2,
     VNODE_ISP_A1W3,
     VNODE_ISP_A1W4,
@@ -67,92 +67,94 @@ enum idm_vnode_code {
 };
 
 enum aquilav1_pad_id {
-       PAD_SENSOR_OUT = 0,
+    PAD_SENSOR_OUT = 0,
 
-	PAD_IDI_IN = 0,
-	PAD_IDI_PIPE1,
-	PAD_IDI_DUMP1,
-	PAD_IDI_PIPE2,
-	PAD_IDI_DUMP2,
-	PAD_IDI_BOTH,
-	IDI_PAD_CNT,
+    PAD_IDI_IN = 0,
+    PAD_IDI_PIPE1,
+    PAD_IDI_DUMP1,
+    PAD_IDI_PIPE2,
+    PAD_IDI_DUMP2,
+    PAD_IDI_BOTH,
+    IDI_PAD_CNT,
 
-	PAD_PIPE_IN = 0,
-	PAD_PIPE_OUT,
-	PIPE_PAD_CNT,
+    PAD_PIPE_IN = 0,
+    PAD_PIPE_OUT,
+    PIPE_PAD_CNT,
 
-	PAD_MS_IN = 0,
-	PAD_MS_OUT,
+    PAD_MS_IN = 0,
+    PAD_MS_OUT,
 
-       PAD_YUVOFFLINE_IN = 0,
-	PAD_YUVOFFLINE_OUT,
+    PAD_YUVOFFLINE_IN = 0,
+    PAD_YUVOFFLINE_OUT,
 
-       PAD_PDNS_IN = 0,
-	PAD_PDNS_OUT,
+    PAD_PDNS_IN = 0,
+    PAD_PDNS_OUT,
 
-	PAD_AXI_IN = 0,
-	PAD_AXI_OUT,
-	AXI_PAD_CNT,
+    PAD_AXI_IN = 0,
+    PAD_AXI_OUT,
+    AXI_PAD_CNT,
 };
+
 enum ccic_pad_id {
-	CCIC_CSI_PAD_IN = 0,
-	CCIC_CSI_PAD_LOCAL,
-	CCIC_CSI_PAD_XFEED,
-	CCIC_CSI_PAD_ISP,
-	CCIC_CSI_PAD_CNT,
+    CCIC_CSI_PAD_IN = 0,
+    CCIC_CSI_PAD_LOCAL,
+    CCIC_CSI_PAD_XFEED,
+    CCIC_CSI_PAD_ISP,
+    CCIC_CSI_PAD_CNT,
 
-	CCIC_DMA_PAD_IN = 0,
-	CCIC_DMA_PAD_OUT,
-	CCIC_DMA_PAD_CNT,
+    CCIC_DMA_PAD_IN = 0,
+    CCIC_DMA_PAD_OUT,
+    CCIC_DMA_PAD_CNT,
 };
+
 #define MEDIA_LNK_FL_ENABLED		(1)
 #define MEDIA_LNK_FL_DISABLED		(0)
 
 #define ISPSD_PAD_MAX 15
 #define MAX_OUTPUT_PER_PIPELINE	8
 struct idm_subdev {
-	struct media_entity	*me;
-	char			name[32];
-       struct media_pad	pads[ISPSD_PAD_MAX];
-       	struct idm_PlatCam		*plat;
-	struct CamNodeOps	*ops;
-       char     open_flag;
-	int			fd;
+    struct media_entity	*me;
+    char   name[32];
+    struct media_pad	pads[ISPSD_PAD_MAX];
+    struct idm_PlatCam		*plat;
+    struct CamNodeOps	*ops;
+    char     open_flag;
+    int			fd;
 };
 struct idm_vnode {
-	struct media_entity	*me;
-	char			name[32];
-       struct media_pad	pads[ISPSD_PAD_MAX];
-       	struct idm_PlatCam		*plat;
-       char     open_flag;
-	int			fd;
+    struct media_entity	*me;
+    char			name[32];
+    struct media_pad	pads[ISPSD_PAD_MAX];
+    struct idm_PlatCam		*plat;
+    char     open_flag;
+    int			fd;
 };
 struct idm_PlatCam {
-	struct media_device	*media;
-	struct idm_subdev		*sd_node[SDCODE_MAX_CNT];
-       struct idm_vnode		*vnode[VNODE_MAX_CNT];
+    struct media_device	*media;
+    struct idm_subdev		*sd_node[SDCODE_MAX_CNT];
+    struct idm_vnode		*vnode[VNODE_MAX_CNT];
 };
 
 struct idm_online_topology {
-       struct idm_subdev	*sensor;
-	struct idm_subdev	*sd_ccic;
-	struct idm_subdev	*sd_idi;
-	struct v4l2_rect	*sd_idi_crop;
-	struct idm_subdev	*sd_path;
-	struct v4l2_rect	*sd_path_crop;
-	struct idm_subdev	*sd_axi_wr[MAX_OUTPUT_PER_PIPELINE];
-	struct idm_vnode	*vnode_dst[MAX_OUTPUT_PER_PIPELINE];
-	int			dst_map;
+    struct idm_subdev	*sensor;
+    struct idm_subdev	*sd_ccic;
+    struct idm_subdev	*sd_idi;
+    struct v4l2_rect	*sd_idi_crop;
+    struct idm_subdev	*sd_path;
+    struct v4l2_rect	*sd_path_crop;
+    struct idm_subdev	*sd_axi_wr[MAX_OUTPUT_PER_PIPELINE];
+    struct idm_vnode	*vnode_dst[MAX_OUTPUT_PER_PIPELINE];
+    int			dst_map;
 };
 
 struct idm_offline_topology {
-	struct idm_vnode	*vnode_src;
-       struct idm_subdev	*sd_axi_rd;
-	struct idm_subdev	*sd_path;
-	struct v4l2_rect	*sd_path_crop;
-	struct idm_subdev	*sd_axi_wr[MAX_OUTPUT_PER_PIPELINE];
-	struct idm_vnode	*vnode_dst[MAX_OUTPUT_PER_PIPELINE];
-	int			dst_map;
+    struct idm_vnode	*vnode_src;
+    struct idm_subdev	*sd_axi_rd;
+    struct idm_subdev	*sd_path;
+    struct v4l2_rect	*sd_path_crop;
+    struct idm_subdev	*sd_axi_wr[MAX_OUTPUT_PER_PIPELINE];
+    struct idm_vnode	*vnode_dst[MAX_OUTPUT_PER_PIPELINE];
+    int			dst_map;
 };
 
 #endif //__IDM_CONTROL_H__

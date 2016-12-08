@@ -500,7 +500,7 @@ void media_print_topology(struct media_device *media, int dot)
 	else
 		media_print_topology_text(media);
 }
-
+#if 0
 int main(int argc, char **argv)
 {
 	struct media_device *media;
@@ -660,4 +660,4 @@ out:
 
 	return ret ? EXIT_FAILURE : EXIT_SUCCESS;
 }
-
+#endif //0

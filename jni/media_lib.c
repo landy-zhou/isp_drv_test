@@ -613,12 +613,16 @@ struct PlatCam *MediaLibInit()
     if (cam == NULL)
 	return NULL;
 
-    cam->media = media_open("/dev/media0");
+    /* Open media device */
+    cam->media = media_device_new("/dev/media0");
     if (cam->media == NULL) {
-	app_err("Failed to open media node");
-	goto out;
+        app_err("Failed to open media node");
+        goto out;
     }
-
+    ret = media_device_enumerate(cam->media);
+    if (ret < 0)
+        goto out;
+ 
     /* Create Node for each media_entity */
     for (i = 0; i < ME_CNT; i++) {
 	struct media_entity *me = media_get_entity_by_id(cam->media, i | MEDIA_ENT_ID_FLAG_NEXT);
@@ -765,8 +769,9 @@ void MediaLibExit(struct PlatCam *cam)
 	}
     }
 
-    if (cam->media)
-	media_close(cam->media);
+   /* if (cam->media)
+	media_device_close(cam->media);
+	*/
     free(cam);
 }
 

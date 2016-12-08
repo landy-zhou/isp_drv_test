@@ -12,6 +12,7 @@ LOCAL_SRC_FILES := media_lib.c \
 		media-ctl/libmediactl.c \
 		media-ctl/libv4l2subdev.c \
 		media-ctl/media-ctl.c \
+		options.c \
 		ion.c \
 		ovmem_ion.c \
 		vbmem_lib.c \

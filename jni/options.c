@@ -29,7 +29,7 @@
 #define MEDIA_DEVNAME_DEFAULT		"/dev/media0"
 
 struct media_options media_opts = {
-	.verbose = 1;
+	.verbose = 1,
 	.devname = MEDIA_DEVNAME_DEFAULT,
 };
 

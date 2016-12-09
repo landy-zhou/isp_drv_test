@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 	};
 	struct CamNodeFmtCombo IdiCfgOut = {
 	    .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
-	     .pad	= AQUILAV1PAD_IDI_PIPE1,
+	    .pad	= AQUILAV1PAD_IDI_PIPE1,
 	    .CropWnd = {	// For Output <t,l,w,h>
 		.left	= 0,
 		.top	= 0,
@@ -302,7 +302,7 @@ int main(int argc, char **argv)
 		    .ParamName	= PARAM_CCIC_SET_COMBO,
 		    .ParamArg	= &CcicCfg,
 		    },
-		    */
+	    */
 	    {
 		.ParamName	= PARAM_IDI_SET_CROP,
 		.ParamArg	= &IdiCfgIn,
@@ -327,11 +327,11 @@ int main(int argc, char **argv)
 		.ParamName	= PARAM_OUTPORT_SET_COMBO,
 		.ParamArg	= &OutportCfgOut,
 	    },
-	    /*	    {
+	    /*    {
 		    .ParamName	= PARAM_OUTPUT_SET_COMBO,
 		    .ParamArg	= &OutputCfg,
 		    },
-		    */
+	    */
 	};
 
 	for(i=0;i<ARRAY_SIZE(para);i++)

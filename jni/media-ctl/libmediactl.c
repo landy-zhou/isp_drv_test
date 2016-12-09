@@ -665,7 +665,7 @@ static struct media_device *__media_device_new(void)
 	media->fd = -1;
 	media->refcount = 1;
 
-	media_debug_set_handler(media, NULL, NULL);
+	media_debug_set_handler(media, (void (*)(void *, ...))fprintf, stdout);
 
 	return media;
 }

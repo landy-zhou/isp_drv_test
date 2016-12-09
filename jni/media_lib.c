@@ -230,6 +230,7 @@ int CamNodeOpen(struct CamNode *node)
 {
     if (node->OpenCnt == 0) {
 	node->me->fd = open(node->me->devname, O_RDWR | O_NONBLOCK);
+	app_info("open %d",node->me->devname);
 	if (node->me->fd < 0) {
 	    app_err("MediaLib failed to open entity '%s': %s", node->me->devname, strerror(errno));
 	    return -errno;
@@ -244,6 +245,7 @@ int CamNodeClose(struct CamNode *node)
     node->OpenCnt--;
     if (node->OpenCnt == 0) {
 	close(node->me->fd);
+	app_info("close %d",node->me->devname);
 	node->me->fd = -1;
     }
     return 0;

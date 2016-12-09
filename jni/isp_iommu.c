@@ -1,6 +1,6 @@
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
-#include "MediaLib.h"
+#include "media_lib.h"
 #include "isp_iommu.h"
 
 int CamIommuInit(int fd,int enable)

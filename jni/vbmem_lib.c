@@ -68,7 +68,7 @@ void vb_exit()
 	}
 }
 
-void *vb_alloc(unsigned long size, int *pfd)
+void *vb_alloc(unsigned long size, int *pfd, int mem_type)
 {
 	void *vaddr, *paddr;
 	struct memory_item *item = NULL;
@@ -81,7 +81,7 @@ void *vb_alloc(unsigned long size, int *pfd)
 	buf_fd = ovmem_alloc(size, OVM_CONTIG, OVM_DEF_ALIGN);
 #endif
 */
-	buf_fd = ovmem_alloc(size, OVM_DMA, OVM_DEF_ALIGN);
+	buf_fd = ovmem_alloc(size, mem_type, OVM_DEF_ALIGN);
 
 	if (buf_fd < 0)
 	{

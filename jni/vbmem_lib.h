@@ -14,7 +14,7 @@ extern "C" {
 
 int vb_init();
 void vb_exit();
-void *vb_alloc(unsigned long size, int *pfd);
+void *vb_alloc(unsigned long size, int *pfd, int mem_type);
 void vb_free(void *vaddr);
 int vb_flush_cache_range(unsigned long start, unsigned long size, int direction);
 

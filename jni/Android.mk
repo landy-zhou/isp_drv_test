@@ -12,7 +12,7 @@ LOCAL_SRC_FILES := media_lib.c \
 		v4l2subdev.c \
 		mediactl.c \
 		ion.c \
-		ovmem-ion.c \
+		ovmem_ion.c \
 		vbmem_lib.c \
 		camera_api.c\
 		asr_isp_test.c\

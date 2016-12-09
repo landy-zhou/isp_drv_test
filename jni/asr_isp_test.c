@@ -383,7 +383,7 @@ int main(int argc, char **argv)
 	    .NrBuf = 3,
 	    .NrFrame = 4,
 	    .save = 1,
-        .mmu_en = topology.iommu,
+	    .mmu_en = topology.iommu,
 	},
     };
     /* open video device */

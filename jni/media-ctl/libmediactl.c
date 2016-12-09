@@ -40,6 +40,7 @@
 #include "mediactl.h"
 #include "mediactl-priv.h"
 #include "tools.h"
+#include "media_lib.h"
 
 /* -----------------------------------------------------------------------------
  * Graph access
@@ -256,6 +257,7 @@ int media_setup_link(struct media_device *media,
 	ulink.flags = flags | (link->flags & MEDIA_LNK_FL_IMMUTABLE);
 
 	ret = ioctl(media->fd, MEDIA_IOC_SETUP_LINK, &ulink);
+    app_info("ioctl,MEDIA_IOC_SETUP_LINK");
 	if (ret == -1) {
 		ret = -errno;
 		media_dbg(media, "%s: Unable to setup link (%s)\n",

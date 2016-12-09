@@ -1,7 +1,7 @@
 /******************************************************************************
  * (C) Copyright [2016] ASR International Ltd.
  * All Rights Reserved
-******************************************************************************/
+ ******************************************************************************/
 
 #include <linux/v5628_api.h>
 #include <linux/v4l2-subdev.h>
@@ -57,14 +57,14 @@ int CamLinkUnitApply(struct CamNode *node, struct CamLinkUnit *unit, int flag)
     int ret;
 
     switch (unit->type) {
-	case CAM_LINK_MEDIAENT:
-	    ret = media_setup_link(node->me->media, unit->mlink->source, unit->mlink->sink, flag);
-	    break;
-	case CAM_LINK_INTERNAL:
-	    ret = node->ops->SetLink(node, unit->ilink, flag);
-	    break;
-	default:
-	    app_info("unknow type of LinkUnit: %d", unit->type);
+        case CAM_LINK_MEDIAENT:
+            ret = media_setup_link(node->me->media, unit->mlink->source, unit->mlink->sink, flag);
+            break;
+        case CAM_LINK_INTERNAL:
+            ret = node->ops->SetLink(node, unit->ilink, flag);
+            break;
+        default:
+            app_info("unknow type of LinkUnit: %d", unit->type);
     }
     return ret;
 }
@@ -74,17 +74,17 @@ int CamLinkApply(struct CamNode *node, struct CamLink *link, int flag)
     int ret = 0;
 
     if (flag == 0)
-	goto link_off;
+        goto link_off;
     if (link->RefCnt == 0) {
-	app_info("try to enable link '%s => %s' ", link->mlink->source->entity->info.name,link->mlink->sink->entity->info.name);
-	ret = media_setup_link(node->me->media, link->mlink->source, link->mlink->sink, flag);
-	if (ret < 0) {
-	    app_err("failed to enable link '%s => %s': %s",
-		    link->mlink->source->entity->info.name,
-		    link->mlink->sink->entity->info.name,
-		    strerror(errno));
-	    goto disable;
-	}
+        app_info("try to enable link '%s => %s' ", link->mlink->source->entity->info.name,link->mlink->sink->entity->info.name);
+        ret = media_setup_link(node->me->media, link->mlink->source, link->mlink->sink, flag);
+        if (ret < 0) {
+            app_err("failed to enable link '%s => %s': %s",
+                    link->mlink->source->entity->info.name,
+                    link->mlink->sink->entity->info.name,
+                    strerror(errno));
+            goto disable;
+        }
     }
     link->RefCnt++;
     return 0;
@@ -93,12 +93,12 @@ link_off:
     link->RefCnt--;
     if (link->RefCnt == 0) {
 disable:
-	ret = media_setup_link(node->me->media, link->mlink->source, link->mlink->sink, flag);
-	if (ret < 0)
-	    app_err("failed to disable link '%s => %s': %s",
-		    link->mlink->source->entity->info.name,
-		    link->mlink->sink->entity->info.name,
-		    strerror(errno));
+        ret = media_setup_link(node->me->media, link->mlink->source, link->mlink->sink, flag);
+        if (ret < 0)
+            app_err("failed to disable link '%s => %s': %s",
+                    link->mlink->source->entity->info.name,
+                    link->mlink->sink->entity->info.name,
+                    strerror(errno));
     }
     return ret;
 }
@@ -108,20 +108,20 @@ int CamRouteApply(struct CamNode *node, struct CamRoute *route, int flag)
     int ret = 0;
 
     if (flag == 0)
-	goto route_cut;
+        goto route_cut;
 
     if (route->RefCnt == 0) {
-	ret = CamLinkApply(node, route->head, flag);
-	if (ret < 0) {
-	    app_err("failed to enable route '%s => %s': %s", route->src->me->info.name, route->dst->me->info.name, strerror(errno));
-	    goto disable;
-	}
-	app_info("enabled route '%s => %s' ", route->src->me->info.name, route->dst->me->info.name);
-	if (route->more) {
-	    ret = CamRouteApply(route->head->dst, route->more, flag);
-	    if (ret < 0)
-		goto disable;
-	}
+        ret = CamLinkApply(node, route->head, flag);
+        if (ret < 0) {
+            app_err("failed to enable route '%s => %s': %s", route->src->me->info.name, route->dst->me->info.name, strerror(errno));
+            goto disable;
+        }
+        app_info("enabled route '%s => %s' ", route->src->me->info.name, route->dst->me->info.name);
+        if (route->more) {
+            ret = CamRouteApply(route->head->dst, route->more, flag);
+            if (ret < 0)
+                goto disable;
+        }
     }
     route->RefCnt++;
     return 0;
@@ -130,20 +130,20 @@ route_cut:
     route->RefCnt--;
 
     if (route->RefCnt <= 0) {
-	if (route->more) {
-	    ret = CamRouteApply(route->head->dst, route->more, flag);
-	    if (ret < 0)
-		return ret;
-	}
+        if (route->more) {
+            ret = CamRouteApply(route->head->dst, route->more, flag);
+            if (ret < 0)
+                return ret;
+        }
 disable:
-	ret = CamLinkApply(node, route->head, flag);
-	if (ret < 0) {
-	    app_err("failed to disable route '%s => %s': %s",
-		    route->src->me->info.name,
-		    route->dst->me->info.name,
-		    strerror(errno));
-	    return ret;
-	}
+        ret = CamLinkApply(node, route->head, flag);
+        if (ret < 0) {
+            app_err("failed to disable route '%s => %s': %s",
+                    route->src->me->info.name,
+                    route->dst->me->info.name,
+                    strerror(errno));
+            return ret;
+        }
     }
     return 0;
 }
@@ -153,7 +153,7 @@ struct CamNode *CamNodeCreate(struct PlatCam *plat, struct media_entity *me, int
     struct CamNode *node = calloc(1, sizeof(*node));
 
     if (node == NULL)
-	return NULL;
+        return NULL;
 
     node->plat = plat;
     node->me = me;
@@ -169,11 +169,11 @@ void CamNodeDestroy(struct CamNode *node)
 }
 
 static int CamNodeAddLink(struct CamNode *node, struct media_link *mlink,
-	struct CamNode *src, struct CamNode *dst)
+        struct CamNode *src, struct CamNode *dst)
 {
     struct CamLink *link = calloc(1, sizeof(*link));
     if (link == NULL)
-	return -ENOMEM;
+        return -ENOMEM;
     link->mlink = mlink;
     link->src = src;
     link->dst = dst;
@@ -190,14 +190,14 @@ int CamNodeSetup(struct CamNode *node)
     int ret = 0;
 
     if (node->NrLink)
-	return 0;
+        return 0;
     for (i = 0; i < node->me->num_links; i++) {
-	struct media_link *link = &node->me->links[i];
-	ret = CamNodeAddLink(node, &node->me->links[i],
-		GetContainer(link->source->entity),
-		GetContainer(link->sink->entity));
-	if (ret < 0)
-	    return ret;
+        struct media_link *link = &node->me->links[i];
+        ret = CamNodeAddLink(node, &node->me->links[i],
+                GetContainer(link->source->entity),
+                GetContainer(link->sink->entity));
+        if (ret < 0)
+            return ret;
     }
     return 0;
 }
@@ -205,13 +205,13 @@ int CamNodeSetup(struct CamNode *node)
 static int CamNodeAddRoute(struct CamNode *node, struct CamLink *head, struct CamRoute *more)
 {
     if (head->src != node)
-	return -EINVAL;
+        return -EINVAL;
     if (more && (head->dst != more->src))
-	return -EINVAL;
+        return -EINVAL;
 
     struct CamRoute *route = calloc(1, sizeof(*route));
     if (route == NULL)
-	return -ENOMEM;
+        return -ENOMEM;
     route->head = head;
     route->more = more;
     route->src = node;
@@ -220,21 +220,21 @@ static int CamNodeAddRoute(struct CamNode *node, struct CamLink *head, struct Ca
     node->route = realloc(node->route, (node->NrRoute + 1) * sizeof(*node->route));
     node->route[node->NrRoute] = route;
     node->NrRoute++;
- 
+
     app_info("added route3 '%s'==>'%s  NrRoute = %d'", route->src->name, route->dst->name, node->NrRoute);
-	
+
     return 0;
 }
 
 int CamNodeOpen(struct CamNode *node)
 {
     if (node->OpenCnt == 0) {
-	node->me->fd = open(node->me->devname, O_RDWR | O_NONBLOCK);
-	app_info("open %d",node->me->devname);
-	if (node->me->fd < 0) {
-	    app_err("MediaLib failed to open entity '%s': %s", node->me->devname, strerror(errno));
-	    return -errno;
-	}
+        node->me->fd = open(node->me->devname, O_RDWR | O_NONBLOCK);
+        app_info("open %s",node->me->devname);
+        if (node->me->fd < 0) {
+            app_err("MediaLib failed to open entity '%s': %s", node->me->devname, strerror(errno));
+            return -errno;
+        }
     }
     node->OpenCnt++;
     return node->me->fd;
@@ -244,24 +244,24 @@ int CamNodeClose(struct CamNode *node)
 {
     node->OpenCnt--;
     if (node->OpenCnt == 0) {
-	close(node->me->fd);
-	app_info("close %d",node->me->devname);
-	node->me->fd = -1;
+        close(node->me->fd);
+        app_info("close %s",node->me->devname);
+        node->me->fd = -1;
     }
     return 0;
 }
 
 static int CamNodeSetFmt(struct CamNode *node, struct v4l2_subdev_format *fmt)
 {
-	int i, ret = 0, fd;
-	fd = CamNodeOpen(node);
-	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_FMT, &fmt);
-	app_info("%s ioctl,VIDIOC_SUBDEV_S_FMT\n",node->name);
-	if (ret < 0) {
-	    app_err("Failed to set format '%s': %s", node->me->devname, strerror(errno));
-	}
-	CamNodeClose(node);
-	return ret;
+    int i, ret = 0, fd;
+    fd = CamNodeOpen(node);
+    ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_FMT, &fmt);
+    app_info("%s ioctl,VIDIOC_SUBDEV_S_FMT\n",node->name);
+    if (ret < 0) {
+        app_err("Failed to set format '%s': %s", node->me->devname, strerror(errno));
+    }
+    CamNodeClose(node);
+    return ret;
 }
 
 static int CamNodeSetCrop(struct CamNode *node, struct v4l2_subdev_selection *sel)
@@ -271,10 +271,10 @@ static int CamNodeSetCrop(struct CamNode *node, struct v4l2_subdev_selection *se
     ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_SELECTION, &sel);
     app_info("%s, ioctl,VIDIOC_SUBDEV_S_SELECTION\n",node->name);
     if (ret < 0) {
-		app_err("Failed to set selection '%s': %s", node->me->devname, strerror(errno));
+        app_err("Failed to set selection '%s': %s", node->me->devname, strerror(errno));
     }
     CamNodeClose(node);
-	return ret;
+    return ret;
 }
 
 int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
@@ -283,76 +283,76 @@ int CamNodeSetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 
     fd = CamNodeOpen(node);
     if (fd < 0)
-	return fd;
+        return fd;
 
     /* Apply selection don't need to notify downstream node */
     if (combo->scope & (1 << PARAM_APPLY_CROP)) {
-	struct v4l2_subdev_selection sel = {
-	    .which	= combo->which,
-	    .pad	= combo->pad,
-	    .r	= combo->CropWnd,
-	};
-	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_SELECTION, &sel);
-	app_info("%s, ioctl,VIDIOC_SUBDEV_S_SELECTION\n",node->name);
-	if (ret < 0) {
-	    app_err("MediaLib failed to set selection '%s': %s", node->me->devname, strerror(errno));
-	    goto exit;
-	}
-	combo->CropWnd = sel.r;
+        struct v4l2_subdev_selection sel = {
+            .which	= combo->which,
+            .pad	= combo->pad,
+            .r	= combo->CropWnd,
+        };
+        ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_SELECTION, &sel);
+        app_info("%s, ioctl,VIDIOC_SUBDEV_S_SELECTION\n",node->name);
+        if (ret < 0) {
+            app_err("MediaLib failed to set selection '%s': %s", node->me->devname, strerror(errno));
+            goto exit;
+        }
+        combo->CropWnd = sel.r;
     }
 
     /* Apply output format, need to notify downstream node */
     if (combo->scope & (1 << PARAM_APPLY_FMT)) {
-	/* Try on local first */
-	struct v4l2_subdev_format fmt = {
-	    .pad	= combo->pad,
-	    .which	= combo->which,
-	    .format = {
-		.width	= combo->width,
-		.height	= combo->height,
-		.code	= combo->code,
-	    },
-	};
-	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_FMT, &fmt);
-	app_info("%s ioctl,VIDIOC_SUBDEV_S_FMT\n",node->name);
-	if (ret < 0) {
-	    app_err("MediaLib failed to set format '%s': %s", node->me->devname, strerror(errno));
-	    ret = -errno;
-	    goto exit;
-	}
-	combo->width = fmt.format.width;
-	combo->height = fmt.format.height;
-	combo->code = fmt.format.code;
+        /* Try on local first */
+        struct v4l2_subdev_format fmt = {
+            .pad	= combo->pad,
+            .which	= combo->which,
+            .format = {
+                .width	= combo->width,
+                .height	= combo->height,
+                .code	= combo->code,
+            },
+        };
+        ret = ioctl(node->me->fd, VIDIOC_SUBDEV_S_FMT, &fmt);
+        app_info("%s ioctl,VIDIOC_SUBDEV_S_FMT\n",node->name);
+        if (ret < 0) {
+            app_err("MediaLib failed to set format '%s': %s", node->me->devname, strerror(errno));
+            ret = -errno;
+            goto exit;
+        }
+        combo->width = fmt.format.width;
+        combo->height = fmt.format.height;
+        combo->code = fmt.format.code;
 #if 0
-	/* only sync format with downstream subdev */
-	if (node->me->pads[combo->pad].flags & MEDIA_PAD_FL_SINK)
-	    goto done;
+        /* only sync format with downstream subdev */
+        if (node->me->pads[combo->pad].flags & MEDIA_PAD_FL_SINK)
+            goto done;
 
-	/* For each downstream node, apply */
-	for (i = 0; i < node->NrLink; i++) {
-	    struct CamLink *link = node->link[i];
-	    if ((link->src != node) || (link->mlink->source->index != combo->pad))
-		continue;
-	    if (link->RefCnt == 0)
-		continue;
-	    struct CamNodeFmtCombo r_combo = *combo;
-	    r_combo.pad = link->mlink->sink->index;
-	    r_combo.scope = (1 << PARAM_APPLY_FMT);
-	    ret = CamNodeSetCombo(GetContainer(link->dst->me), &r_combo);
-	    if (ret < 0)
-		goto exit;
-	    if ((r_combo.width != combo->width) ||
-		    (r_combo.height != combo->height) ||
-		    (r_combo.code != combo->code)) {
-		app_err("new format<w%d, h%d, c%X> proposed by subdev %s, original format is <w%d, h%d, c%X>",
-			r_combo.width, r_combo.height, r_combo.code, link->dst->me->info.name,
-			combo->width, combo->height, combo->code);
-		goto exit;
-	    }
-	}
+        /* For each downstream node, apply */
+        for (i = 0; i < node->NrLink; i++) {
+            struct CamLink *link = node->link[i];
+            if ((link->src != node) || (link->mlink->source->index != combo->pad))
+                continue;
+            if (link->RefCnt == 0)
+                continue;
+            struct CamNodeFmtCombo r_combo = *combo;
+            r_combo.pad = link->mlink->sink->index;
+            r_combo.scope = (1 << PARAM_APPLY_FMT);
+            ret = CamNodeSetCombo(GetContainer(link->dst->me), &r_combo);
+            if (ret < 0)
+                goto exit;
+            if ((r_combo.width != combo->width) ||
+                    (r_combo.height != combo->height) ||
+                    (r_combo.code != combo->code)) {
+                app_err("new format<w%d, h%d, c%X> proposed by subdev %s, original format is <w%d, h%d, c%X>",
+                        r_combo.width, r_combo.height, r_combo.code, link->dst->me->info.name,
+                        combo->width, combo->height, combo->code);
+                goto exit;
+            }
+        }
 #endif //0
 done:
-	;
+        ;
     }
 exit:
     CamNodeClose(node);
@@ -365,40 +365,40 @@ static int CamNodeGetCombo(struct CamNode *node, struct CamNodeFmtCombo *combo)
 
     fd = CamNodeOpen(node);
     if (fd < 0)
-	return fd;
+        return fd;
 
     if (combo->scope & (1 << PARAM_APPLY_CROP)) {
-	struct v4l2_subdev_selection sel = {
-	    .which	= combo->which,
-	    .pad	= combo->pad,
-	};
-	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_G_SELECTION, &sel);
-	app_info("ioctl,VIDIOC_SUBDEV_G_SELECTION\n");
-	if (ret < 0) {
-	    app_err("MediaLib failed to get selection '%s': %s", node->me->devname, strerror(errno));
-	    ret = -errno;
-	    goto exit;
-	}
-	combo->CropWnd = sel.r;
+        struct v4l2_subdev_selection sel = {
+            .which	= combo->which,
+            .pad	= combo->pad,
+        };
+        ret = ioctl(node->me->fd, VIDIOC_SUBDEV_G_SELECTION, &sel);
+        app_info("ioctl,VIDIOC_SUBDEV_G_SELECTION\n");
+        if (ret < 0) {
+            app_err("MediaLib failed to get selection '%s': %s", node->me->devname, strerror(errno));
+            ret = -errno;
+            goto exit;
+        }
+        combo->CropWnd = sel.r;
     }
 
     /* Apply output format, need to notify downstream node */
     if (combo->scope & (1 << PARAM_APPLY_FMT)) {
-	/* Try on local first */
-	struct v4l2_subdev_format fmt = {
-	    .pad	= combo->pad,
-	    .which	= combo->which,
-	};
-	ret = ioctl(node->me->fd, VIDIOC_SUBDEV_G_FMT, &fmt);
-	app_info("ioctl,VIDIOC_SUBDEV_G_FMT\n");
-	if (ret < 0) {
-	    app_err("MediaLib failed to get format '%s': %s", node->me->devname, strerror(errno));
-	    ret = -errno;
-	    goto exit;
-	}
-	combo->width = fmt.format.width;
-	combo->height = fmt.format.height;
-	combo->code = fmt.format.code;
+        /* Try on local first */
+        struct v4l2_subdev_format fmt = {
+            .pad	= combo->pad,
+            .which	= combo->which,
+        };
+        ret = ioctl(node->me->fd, VIDIOC_SUBDEV_G_FMT, &fmt);
+        app_info("ioctl,VIDIOC_SUBDEV_G_FMT\n");
+        if (ret < 0) {
+            app_err("MediaLib failed to get format '%s': %s", node->me->devname, strerror(errno));
+            ret = -errno;
+            goto exit;
+        }
+        combo->width = fmt.format.width;
+        combo->height = fmt.format.height;
+       combo->code = fmt.format.code;
     }
 exit:
     CamNodeClose(node);
@@ -411,14 +411,14 @@ int CamNodeSetCtrl(struct CamNode *node, struct CamCtx *ctx)
 
     fd = CamNodeOpen(node);
     if (fd < 0)
-	return fd;
+        return fd;
 
     ret = ioctl(fd, VIDIOC_PRIVATE_AQUILAV1ISP_TOPOLOGY_SNAPSHOT, ctx);
     app_info("%s ioctl,VIDIOC_PRIVATE_AQUILAV1ISP_TOPOLOGY_SNAPSHOT\n",node->name);
     if (ret < 0) {
-	app_err("MediaLib failed to trigger topology snapshot for context '%s' : %s", node->name, strerror(errno));
-	ret = -errno;
-	goto exit;
+        app_err("MediaLib failed to trigger topology snapshot for context '%s' : %s", node->name, strerror(errno));
+        ret = -errno;
+        goto exit;
     }
 
 exit:
@@ -448,10 +448,10 @@ static int NodeQPush(struct NodeQ *q, struct CamNode *node)
 {
     int pos = q->in + 1;
     if (pos >= NODE_QUEUE_DEPTH)
-	pos = 0;
+        pos = 0;
     /* Queue full? */
     if (pos == q->out)
-	return -ENOMEM;
+        return -ENOMEM;
 
     q->queue[q->in] = node;
     q->in = pos;
@@ -463,9 +463,9 @@ static struct CamNode *NodeQPop(struct NodeQ *q)
     int pos = q->out + 1;
     struct CamNode *node = q->queue[q->out];
     if (pos >= NODE_QUEUE_DEPTH)
-	pos = 0;
+        pos = 0;
     if (NodeQEmpty(q))
-	return NULL;
+        return NULL;
 
     q->out = pos;
     return node;
@@ -480,47 +480,47 @@ static int CamNodeSetupRoute(struct CamNode *node)
     int i, j, ret;
     if (node->NrRoute)
     {
-	app_info("route already setup for %s,%d", node->name, node->NrRoute);
-	return node->NrRoute;
+        app_info("route already setup for %s,%d", node->name, node->NrRoute);
+        return node->NrRoute;
     }
 
     for (i = 0; i < node->NrLink; i++) {
-	struct CamNode *dst = node->link[i]->dst;
-	if ((dst == NULL) || (dst == node))
-	{
-	    if(dst != NULL)
-		app_err("failed to setup route '%s'==>'%s'", node->name, dst->name);
-	    else
-		app_err("failed to setup route '%s'==> NULL", node->name);
-	    continue;
-	}
-	app_info("setup route '%s'==>'%s',link '%s'-->'%s', total links %d ", node->name, dst->name,node->link[i]->src->name, node->link[i]->dst->name,node->NrLink);
+        struct CamNode *dst = node->link[i]->dst;
+        if ((dst == NULL) || (dst == node))
+        {
+            if(dst != NULL)
+                app_err("failed to setup route '%s'==>'%s'", node->name, dst->name);
+            else
+                app_err("failed to setup route '%s'==> NULL", node->name);
+            continue;
+        }
+        app_info("setup route '%s'==>'%s',link '%s'-->'%s', total links %d ", node->name, dst->name,node->link[i]->src->name, node->link[i]->dst->name,node->NrLink);
 
-	if (dst->level) {
-	    ret = CamNodeSetupRoute(dst);
-	    if (ret < 0)
-		return ret;
-	   // for (j = 0; j < dst->NrRoute; j++) {
-		//ret = CamNodeAddRoute(node, node->link[i], dst->route[j]);
-		ret = CamNodeAddRoute(node, node->link[i],NULL);
-		if (ret < 0) {
-		    app_err("failed to add route1 '%s'==>'%s'", node->name, dst->name);
-		    return ret;
-		//}
-		//app_info("added route1 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
-	    }
-	} else {
-	    ret = CamNodeAddRoute(node, node->link[i], NULL);
-	    if (ret < 0) {
-		app_err("failed to add route2 '%s'=>'%s'", node->name, dst->name);
-		return ret;
-	    }
-		//app_info("added route2 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
-	}
+        if (dst->level) {
+            ret = CamNodeSetupRoute(dst);
+            if (ret < 0)
+                return ret;
+            // for (j = 0; j < dst->NrRoute; j++) {
+            //ret = CamNodeAddRoute(node, node->link[i], dst->route[j]);
+            ret = CamNodeAddRoute(node, node->link[i],NULL);
+            if (ret < 0) {
+                app_err("failed to add route1 '%s'==>'%s'", node->name, dst->name);
+                return ret;
+                //}
+                //app_info("added route1 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
+        }
+        } else {
+            ret = CamNodeAddRoute(node, node->link[i], NULL);
+            if (ret < 0) {
+                app_err("failed to add route2 '%s'=>'%s'", node->name, dst->name);
+                return ret;
+            }
+            //app_info("added route2 '%s'==>'%s  NrRoute = %d'", node->name, node->link[i]->dst->name, node->NrRoute);
+        }
     }
     //debug info
     for (i = 0; i < node->NrRoute; i++)
-	app_info("route '%s' ==> '%s' detected", node->route[i]->src->name, node->route[i]->dst->name);
+        app_info("route '%s' ==> '%s' detected", node->route[i]->src->name, node->route[i]->dst->name);
     return node->NrRoute;
 }
 /* Use DynamicPrograming to setup Source for reachable Path */
@@ -532,69 +532,69 @@ static int MediaLibSearchRoute(struct PlatCam *cam)
     //find Paths and push to stack 
     QReset;
     for (i = 0; i < cam->NrPath; i++) {
-	if (cam->PathPool[i]) {
-	    ret = QPush(cam->PathPool[i]);
-	    if (ret < 0)
-		goto exit_err;
-	}
+        if (cam->PathPool[i]) {
+            ret = QPush(cam->PathPool[i]);
+            if (ret < 0)
+                goto exit_err;
+        }
     }
     //recursion node source link to find all nodes,and update their level value only
     do {
-	struct CamNode *node = QPop;
-	if (node == NULL)
-	    break;
-	app_info("node %s level = %d",node->name,node->level);
-	for (j = 0; j < node->NrLink; j++) {
-	    struct CamNode *up = node->link[j]->src;
-	    if (up == node)
-		continue;
-	    if (node->level + 1 > up->level) {
-		up->level =  node->level + 1;
-		ret = QPush(up);
-		if (ret < 0)
-		    goto exit_err;
-	    }
-	}
+        struct CamNode *node = QPop;
+        if (node == NULL)
+            break;
+        app_info("node %s level = %d",node->name,node->level);
+        for (j = 0; j < node->NrLink; j++) {
+            struct CamNode *up = node->link[j]->src;
+            if (up == node)
+                continue;
+            if (node->level + 1 > up->level) {
+                up->level =  node->level + 1;
+                ret = QPush(up);
+                if (ret < 0)
+                    goto exit_err;
+            }
+        }
     } while(1);
     //setup Links as Routes
     //for (i = 0; i < cam->NrSrc; i++) {
     for (i = 0; i < 1; i++) {
-	app_info("setup route for source %s ",cam->SrcPool[i]->name);
-	ret = CamNodeSetupRoute(cam->SrcPool[i]);
-	if (ret < 0)
-	    goto exit_err;
+        app_info("setup route for source %s ",cam->SrcPool[i]->name);
+        ret = CamNodeSetupRoute(cam->SrcPool[i]);
+        if (ret < 0)
+            goto exit_err;
     }
 
     QReset;
     for (i = 0; i < cam->NrDst; i++) {
-	if (cam->DstPool[i]) {
-	    ret = QPush(cam->DstPool[i]);
-	    if (ret < 0)
-		goto exit_err;
-	}
+        if (cam->DstPool[i]) {
+            ret = QPush(cam->DstPool[i]);
+            if (ret < 0)
+                goto exit_err;
+        }
     }
     do {
-	struct CamNode *node = QPop;
-	if (node == NULL)
-	    break;
-	app_info("node %s level = %d",node->name,node->level);
-	for (j = 0; j < node->NrLink; j++) {
-	    struct CamNode *up = node->link[j]->src;
-	    if (up == node)
-		continue;
-	    if (node->level + 1 > up->level) {
-		up->level =  node->level + 1;
-		ret = QPush(up);
-		if (ret < 0)
-		    goto exit_err;
-	    }
-	}
+        struct CamNode *node = QPop;
+        if (node == NULL)
+            break;
+        app_info("node %s level = %d",node->name,node->level);
+        for (j = 0; j < node->NrLink; j++) {
+            struct CamNode *up = node->link[j]->src;
+            if (up == node)
+                continue;
+            if (node->level + 1 > up->level) {
+                up->level =  node->level + 1;
+                ret = QPush(up);
+                if (ret < 0)
+                    goto exit_err;
+            }
+        }
     } while(1);
     for (i = 0; i < cam->NrPath; i++) {
-	app_info("setup route for path %s ",cam->PathPool[i]->name);
-	ret = CamNodeSetupRoute(cam->PathPool[i]);
-	if (ret < 0)
-	    goto exit_err;
+        app_info("setup route for path %s ",cam->PathPool[i]->name);
+        ret = CamNodeSetupRoute(cam->PathPool[i]);
+        if (ret < 0)
+            goto exit_err;
     }
 
     QReset;
@@ -613,7 +613,7 @@ struct PlatCam *MediaLibInit()
 
     cam = calloc(1, sizeof(struct PlatCam));
     if (cam == NULL)
-	return NULL;
+        return NULL;
 
     /* Open media device */
     cam->media = media_device_new("/dev/media0");
@@ -624,100 +624,100 @@ struct PlatCam *MediaLibInit()
     ret = media_device_enumerate(cam->media);
     if (ret < 0)
         goto out;
- 
+
     /* Create Node for each media_entity */
     for (i = 0; i < ME_CNT; i++) {
-	struct media_entity *me = media_get_entity_by_id(cam->media, i | MEDIA_ENT_ID_FLAG_NEXT);
-	struct CamNode *node;
-	if (me == NULL)
-	    break;
-	app_info("Find media_entity: %s",me->info.name);
-	node = CamNodeCreate(cam, me, i);
-	if (node == NULL)
-	    goto out;
+        struct media_entity *me = media_get_entity_by_id(cam->media, i | MEDIA_ENT_ID_FLAG_NEXT);
+        struct CamNode *node;
+        if (me == NULL)
+            break;
+        app_info("Find media_entity: %s",me->info.name);
+        node = CamNodeCreate(cam, me, i);
+        if (node == NULL)
+            goto out;
 
-	node->id = i;
-	cam->node[i] = node;
-	cam->NrME++;
+        node->id = i;
+        cam->node[i] = node;
+        cam->NrME++;
     }
 
     /* Setup each node for the dst and links */
     for (i = 0; i < cam->NrME; i++) {
-	if (cam->node[i]) {
-	    ret = CamNodeSetup(cam->node[i]);
-	    if (ret < 0)
-		goto out;
+        if (cam->node[i]) {
+            ret = CamNodeSetup(cam->node[i]);
+            if (ret < 0)
+                goto out;
 #if 1
-	    int j;
-	    for (j = 0; j < cam->node[i]->NrLink; j++) {
-		struct CamLink *link = cam->node[i]->link[j];
-		app_info("%s link%d: '%s'=>'%s'", cam->node[i]->name, j, link->src->name, link->dst->name);
-	    }
+            int j;
+            for (j = 0; j < cam->node[i]->NrLink; j++) {
+                struct CamLink *link = cam->node[i]->link[j];
+                app_info("%s link%d: '%s'=>'%s'", cam->node[i]->name, j, link->src->name, link->dst->name);
+            }
 #endif
-	}
+        }
     }
 
     /* Identify node types among all Nodes */
     ret = MediaLibFindSource(cam); //sensors or offline input
     if (ret < 0)
-	goto out;
+        goto out;
 
     ret = MediaLibFindPath(cam); //isp pipeline
     if (ret < 0)
-	goto out;
+        goto out;
 
     ret = MediaLibFindDst(cam); //output video device
     if (ret < 0)
-	goto out;
+        goto out;
 
     ret = MediaLibFindCCIC(cam); //ccic
     if (ret < 0)
-	goto out;
-	
+        goto out;
+
     ret = MediaLibFindIDI(cam); //idi 
     if (ret < 0)
-	goto out;
+        goto out;
 
     ret = MediaLibFindOutport(cam); //axi output port
     if (ret < 0)
-		goto out;
-	
+        goto out;
+
 #if 0
     ret = MediaLibSearchRoute(cam);
     if (ret < 0)
     {
-	app_err("MediaLibSearchRoute error\n");
-	goto out;
+        app_err("MediaLibSearchRoute error\n");
+        goto out;
     }
 #endif
     /* This is just a W/R to retain power status */
     {
-	int sid;
-	struct media_entity *me;
-	struct CamNode *node;
+        int sid;
+        struct media_entity *me;
+        struct CamNode *node;
 
-	/* retain ISP power */
-	me = media_get_entity_by_name(cam->media, V5628_IDI1_NAME, strlen(V5628_IDI1_NAME));
-	if (me == NULL) {
-	    app_err("media_get_entity_by_name error\n");
-	    ret = -ENODEV;
-	    goto out;
-	}
-	node = GetContainer(me);
-	if (node == NULL) {
-	    app_err("GetContainer error\n");
-	    ret = -ENODEV;
-	    goto out;
-	}
-	CamNodeOpen(node);
+        /* retain ISP power */
+        me = media_get_entity_by_name(cam->media, V5628_IDI1_NAME, strlen(V5628_IDI1_NAME));
+        if (me == NULL) {
+            app_err("media_get_entity_by_name error\n");
+            ret = -ENODEV;
+            goto out;
+        }
+        node = GetContainer(me);
+        if (node == NULL) {
+            app_err("GetContainer error\n");
+            ret = -ENODEV;
+            goto out;
+        }
+        CamNodeOpen(node);
 
-	/* retain sensor power */
-	/*for (sid = 0; sid < cam->NrSrc; sid++) {
-	  node = cam->SrcPool[sid];
-	  if (!TstFlag(node, CAMNODE_FL_T_SOURCE))
-	  continue;
-	  CamNodeOpen(node);
-	  }*/
+        /* retain sensor power */
+        /*for (sid = 0; sid < cam->NrSrc; sid++) {
+          node = cam->SrcPool[sid];
+          if (!TstFlag(node, CAMNODE_FL_T_SOURCE))
+          continue;
+          CamNodeOpen(node);
+          }*/
     }
     return cam;
 
@@ -750,29 +750,29 @@ void MediaLibExit(struct PlatCam *cam)
 {
     /* This is just a W/R to relax power status */
     {
-	int sid;
-	struct media_entity *me;
-	struct CamNode *node;
+        int sid;
+        struct media_entity *me;
+        struct CamNode *node;
 
-	/* relax sensor power */
-	/*for (sid = 0; sid < cam->NrSrc; sid++) {
-	  node = cam->SrcPool[sid];
-	  if (!TstFlag(node, CAMNODE_FL_T_SOURCE))
-	  continue;
-	  CamNodeClose(node);
-	  }*/
+        /* relax sensor power */
+        /*for (sid = 0; sid < cam->NrSrc; sid++) {
+          node = cam->SrcPool[sid];
+          if (!TstFlag(node, CAMNODE_FL_T_SOURCE))
+          continue;
+          CamNodeClose(node);
+          }*/
 
-	/* relax ISP power */
-	me = media_get_entity_by_name(cam->media, V5628_IDI1_NAME, strlen(V5628_IDI1_NAME));
-	if (me) {
-	    node = GetContainer(me);
-	    if (node)
-		CamNodeClose(node);
-	}
+        /* relax ISP power */
+        me = media_get_entity_by_name(cam->media, V5628_IDI1_NAME, strlen(V5628_IDI1_NAME));
+        if (me) {
+            node = GetContainer(me);
+            if (node)
+                CamNodeClose(node);
+        }
     }
 
     //if (cam->media)
-	//media_device_close(cam->media);
+    //media_device_close(cam->media);
     free(cam);
 }
 
@@ -781,39 +781,39 @@ int MediaLibFindSource(struct PlatCam *cam)
     int i, j;
 
     for (i = 0; i < cam->NrME; i++) {
-	struct media_entity *me;
-	if (cam->node[i] == NULL)
-	    continue;
-	me = cam->node[i]->me;
-	if (me == NULL)
-	    continue;
-	if ((me->info.type != MEDIA_ENT_T_V4L2_SUBDEV_SENSOR) &&
-		(me->info.type != MEDIA_ENT_T_DEVNODE_V4L))
-	    continue;
-	/* Make sure it's really a source entity, and don't accept data */
-	for (j = 0; j < me->info.pads; j++) {
-	    struct media_pad *pad = me->pads + j;
-	    if (pad->flags & MEDIA_PAD_FL_SINK)
-		goto skip;
-	}
-	if (me->info.type == MEDIA_ENT_T_DEVNODE_V4L) {
-	    SetFlag(cam->node[i], CAMNODE_FL_T_INPUT);
-	    app_info("Find input %d <v4l-dev>: %s", cam->NrSrc, cam->node[i]->name);
-	} else {
-	    SetFlag(cam->node[i], CAMNODE_FL_T_SOURCE);
-	    app_info("Find input %d <sensor>: %s", cam->NrSrc, cam->node[i]->name);
-	}
-	cam->SrcPool[cam->NrSrc] = cam->node[i];
-	cam->NrSrc++;
+        struct media_entity *me;
+        if (cam->node[i] == NULL)
+            continue;
+        me = cam->node[i]->me;
+        if (me == NULL)
+            continue;
+        if ((me->info.type != MEDIA_ENT_T_V4L2_SUBDEV_SENSOR) &&
+                (me->info.type != MEDIA_ENT_T_DEVNODE_V4L))
+            continue;
+        /* Make sure it's really a source entity, and don't accept data */
+        for (j = 0; j < me->info.pads; j++) {
+            struct media_pad *pad = me->pads + j;
+            if (pad->flags & MEDIA_PAD_FL_SINK)
+                goto skip;
+        }
+        if (me->info.type == MEDIA_ENT_T_DEVNODE_V4L) {
+            SetFlag(cam->node[i], CAMNODE_FL_T_INPUT);
+            app_info("Find input %d <v4l-dev>: %s", cam->NrSrc, cam->node[i]->name);
+        } else {
+            SetFlag(cam->node[i], CAMNODE_FL_T_SOURCE);
+            app_info("Find input %d <sensor>: %s", cam->NrSrc, cam->node[i]->name);
+        }
+        cam->SrcPool[cam->NrSrc] = cam->node[i];
+        cam->NrSrc++;
 skip:;
     }
 #if 0
     /* FIXME: remove the hard coding!!! */
     for (i = ME_CCIC_CSI0; i <= ME_CCIC_CSI1; i++ ) {
-	if (cam->node[i]->me == NULL)
-	    continue;
-	cam->SrcPool[cam->NrSrc] = cam->node[i];
-	cam->NrSrc++;
+        if (cam->node[i]->me == NULL)
+            continue;
+        cam->SrcPool[cam->NrSrc] = cam->node[i];
+        cam->NrSrc++;
     }
 #endif
     return cam->NrSrc;
@@ -825,17 +825,17 @@ int MediaLibFindCCIC(struct PlatCam *cam)
     unsigned int i, ret;
 
     for (i = 0; i < sizeof(v5628_ccic_name)/sizeof(v5628_ccic_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_ccic_name[i], strlen(v5628_ccic_name[i]));
-	struct CamNode *node;
-	if (me == NULL)
-	    continue;
-	node = GetContainer(me);
-	if (node == NULL)
-	    continue;
-	SetFlag(node, CAMNODE_FL_T_CCIC);
-	app_info("Find ccic %d: %s", cam->NrCcic, node->name);
-	cam->CcicPool[cam->NrCcic] = node;
-	cam->NrCcic++;
+        struct media_entity *me = media_get_entity_by_name(cam->media, v5628_ccic_name[i], strlen(v5628_ccic_name[i]));
+        struct CamNode *node;
+        if (me == NULL)
+            continue;
+        node = GetContainer(me);
+        if (node == NULL)
+            continue;
+        SetFlag(node, CAMNODE_FL_T_CCIC);
+        app_info("Find ccic %d: %s", cam->NrCcic, node->name);
+        cam->CcicPool[cam->NrCcic] = node;
+        cam->NrCcic++;
     }
     return cam->NrCcic;
 }
@@ -845,17 +845,17 @@ int MediaLibFindIDI(struct PlatCam *cam)
     unsigned int i, ret;
 
     for (i = 0; i < sizeof(v5628_idi_name)/sizeof(v5628_idi_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_idi_name[i], strlen(v5628_idi_name[i]));
-	struct CamNode *node;
-	if (me == NULL)
-	    continue;
-	node = GetContainer(me);
-	if (node == NULL)
-	    continue;
-	SetFlag(node, CAMNODE_FL_T_IDI);
-	app_info("Find idi %d: %s", cam->NrIdi, node->name);
-	cam->IdiPool[cam->NrIdi] = node;
-	cam->NrIdi++;
+        struct media_entity *me = media_get_entity_by_name(cam->media, v5628_idi_name[i], strlen(v5628_idi_name[i]));
+        struct CamNode *node;
+        if (me == NULL)
+            continue;
+        node = GetContainer(me);
+        if (node == NULL)
+            continue;
+        SetFlag(node, CAMNODE_FL_T_IDI);
+        app_info("Find idi %d: %s", cam->NrIdi, node->name);
+        cam->IdiPool[cam->NrIdi] = node;
+        cam->NrIdi++;
     }
     return cam->NrIdi;
 }
@@ -865,17 +865,17 @@ int MediaLibFindOutport(struct PlatCam *cam)
     unsigned int i, ret;
 
     for (i = 0; i < sizeof(v5628_outport_name)/sizeof(v5628_outport_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_outport_name[i], strlen(v5628_outport_name[i]));
-	struct CamNode *node;
-	if (me == NULL)
-	    continue;
-	node = GetContainer(me);
-	if (node == NULL)
-	    continue;
-	SetFlag(node, CAMNODE_FL_T_OUTPORT);
-	app_info("Find outport %d: %s", cam->NrOutport, node->name);
-	cam->OutportPool[cam->NrOutport] = node;
-	cam->NrOutport++;
+        struct media_entity *me = media_get_entity_by_name(cam->media, v5628_outport_name[i], strlen(v5628_outport_name[i]));
+        struct CamNode *node;
+        if (me == NULL)
+            continue;
+        node = GetContainer(me);
+        if (node == NULL)
+            continue;
+        SetFlag(node, CAMNODE_FL_T_OUTPORT);
+        app_info("Find outport %d: %s", cam->NrOutport, node->name);
+        cam->OutportPool[cam->NrOutport] = node;
+        cam->NrOutport++;
     }
     return cam->NrIdi;
 }
@@ -885,17 +885,17 @@ int MediaLibFindPath(struct PlatCam *cam)
     unsigned int i, ret;
 
     for (i = 0; i < sizeof(v5628_path_name)/sizeof(v5628_path_name[0]); i++) {
-	struct media_entity *me = media_get_entity_by_name(cam->media, v5628_path_name[i], strlen(v5628_path_name[i]));
-	struct CamNode *node;
-	if (me == NULL)
-	    continue;
-	node = GetContainer(me);
-	if (node == NULL)
-	    continue;
-	SetFlag(node, CAMNODE_FL_T_PATH);
-	app_info("Find path %d: %s", cam->NrPath, node->name);
-	cam->PathPool[cam->NrPath] = node;
-	cam->NrPath++;
+        struct media_entity *me = media_get_entity_by_name(cam->media, v5628_path_name[i], strlen(v5628_path_name[i]));
+        struct CamNode *node;
+        if (me == NULL)
+            continue;
+        node = GetContainer(me);
+        if (node == NULL)
+            continue;
+        SetFlag(node, CAMNODE_FL_T_PATH);
+        app_info("Find path %d: %s", cam->NrPath, node->name);
+        cam->PathPool[cam->NrPath] = node;
+        cam->NrPath++;
     }
     return cam->NrPath;
 }
@@ -905,21 +905,21 @@ int MediaLibFindDst(struct PlatCam *cam)
     int i, j;
 
     for (i = 0; i < cam->NrME; i++) {
-	struct media_entity *me;
-	if (cam->node[i] == NULL)
-	    continue;
-	me = cam->node[i]->me;
-	if ((me == NULL) || (me->info.type != MEDIA_ENT_T_DEVNODE_V4L))
-	    continue;
-	for (j = 0; j < me->info.pads; j++) {
-	    struct media_pad *pad = me->pads + j;
-	    if (pad->flags & MEDIA_PAD_FL_SOURCE)
-		goto skip;
-	}
-	app_info("Find output %d: %s", cam->NrDst, cam->node[i]->name);
-	SetFlag(cam->node[i], CAMNODE_FL_T_OUTPUT);
-	cam->DstPool[cam->NrDst] = cam->node[i];
-	cam->NrDst++;
+        struct media_entity *me;
+        if (cam->node[i] == NULL)
+            continue;
+        me = cam->node[i]->me;
+        if ((me == NULL) || (me->info.type != MEDIA_ENT_T_DEVNODE_V4L))
+            continue;
+        for (j = 0; j < me->info.pads; j++) {
+            struct media_pad *pad = me->pads + j;
+            if (pad->flags & MEDIA_PAD_FL_SOURCE)
+                goto skip;
+        }
+        app_info("Find output %d: %s", cam->NrDst, cam->node[i]->name);
+        SetFlag(cam->node[i], CAMNODE_FL_T_OUTPUT);
+        cam->DstPool[cam->NrDst] = cam->node[i];
+        cam->NrDst++;
 skip:;
     }
     return cam->NrDst;
@@ -930,9 +930,9 @@ int MediaLibEnumSource(struct PlatCam *cam, int idx, struct CamNodeEnum *desc)
     int i, j, cnt = -1;
 
     if (cam == NULL)
-	return -EINVAL;
+        return -EINVAL;
     if (idx >= cam->NrSrc)
-	return -ENODEV;
+        return -ENODEV;
 
     desc->index = idx;
     strncpy(desc->name, cam->SrcPool[idx]->name, sizeof(desc->name));
@@ -944,9 +944,9 @@ int MediaLibEnumSource(struct PlatCam *cam, int idx, struct CamNodeEnum *desc)
 int MediaLibEnumPath(struct PlatCam *cam, int idx, struct CamNodeEnum *desc)
 {
     if (cam == NULL)
-	return -EINVAL;
+        return -EINVAL;
     if (idx >= cam->NrPath)
-	return -ENODEV;
+        return -ENODEV;
 
     desc->index = idx;
     strncpy(desc->name, cam->PathPool[idx]->name, sizeof(desc->name));
@@ -963,27 +963,27 @@ int CameraContextInit(struct PlatCam *cam, int SrcID, int PathID, int NrDst)
     int ctx_id, i, j, ret = -1;
 
     if (SrcID >= cam->NrSrc)
-	return -EINVAL;
+        return -EINVAL;
 
     if (PathID >= cam->NrPath)
-	return -EINVAL;
+        return -EINVAL;
 
     p_node = cam->PathPool[PathID];
     /* FIXME: MUST hold a lock before access nodes' flag */
     if (TstFlag(p_node, CAMNODE_FL_S_OCCUPY)) {
-	/* FIXME: unlock here */
-	return -EBUSY;
+        /* FIXME: unlock here */
+        return -EBUSY;
     }
     /* FIXME: unlock here */
     SetFlag(p_node, CAMNODE_FL_S_OCCUPY);
     if (NrDst > p_node->NrRoute)
-	return -EPERM;
+        return -EPERM;
 
     for (i = 0; i < cam->SrcPool[SrcID]->NrRoute; i++) {
-	//if (cam->SrcPool[SrcID]->route[i]->dst == p_node)
-	app_info("finding route from '%s' to '%s'", cam->SrcPool[SrcID]->name,cam->SrcPool[SrcID]->route[i]->dst->name);
-	if (!strcmp(cam->SrcPool[SrcID]->route[i]->dst->name,"ccic-csi #0"))
-	    goto find;
+        //if (cam->SrcPool[SrcID]->route[i]->dst == p_node)
+        app_info("finding route from '%s' to '%s'", cam->SrcPool[SrcID]->name,cam->SrcPool[SrcID]->route[i]->dst->name);
+        if (!strcmp(cam->SrcPool[SrcID]->route[i]->dst->name,"ccic-csi #0"))
+            goto find;
     }
     app_err("NO route find between '%s' and '%s'", cam->SrcPool[SrcID]->name, cam->PathPool[PathID]->name);
     return -EPIPE;
@@ -991,12 +991,12 @@ int CameraContextInit(struct PlatCam *cam, int SrcID, int PathID, int NrDst)
 find:
     route = cam->SrcPool[SrcID]->route[i];
     for (i = 0; i < CONTEXT_PER_PLATFORM; i++) {
-	if (cam->ctx[i])
-	    continue;
-	ctx = calloc(1, sizeof(struct CamCtx));
-	if (cam->ctx == NULL)
-	    return -ENOMEM;
-	goto ctx_ready;
+        if (cam->ctx[i])
+            continue;
+        ctx = calloc(1, sizeof(struct CamCtx));
+        if (cam->ctx == NULL)
+            return -ENOMEM;
+        goto ctx_ready;
     }
     app_info("Maximum number of context:%d reached", CONTEXT_PER_PLATFORM);
     return -ENOMEM;

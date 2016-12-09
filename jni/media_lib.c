@@ -769,8 +769,8 @@ void MediaLibExit(struct PlatCam *cam)
 	}
     }
 
-    if (cam->media)
-	media_close(cam->media);
+    //if (cam->media)
+	//media_device_close(cam->media);
     free(cam);
 }
 

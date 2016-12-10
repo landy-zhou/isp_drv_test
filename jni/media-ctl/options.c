@@ -1,7 +1,7 @@
 /*
  * Media controller test application
  *
- * Copyright (C) 2010-2014 Ideas on board SPRL
+ * Copyright (C) 2010-2011 Ideas on board SPRL
  *
  * Contact: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
  *
@@ -32,24 +32,26 @@ struct media_options media_opts = {
 	.devname = MEDIA_DEVNAME_DEFAULT,
 };
 
-static void usage(const char *argv0)
+static void usage(const char *argv0, int verbose)
 {
-	printf("%s [options]\n", argv0);
+	printf("%s [options] device\n", argv0);
 	printf("-d, --device dev	Media device name (default: %s)\n", MEDIA_DEVNAME_DEFAULT);
 	printf("-e, --entity name	Print the device name associated with the given entity\n");
 	printf("-V, --set-v4l2 v4l2	Comma-separated list of formats to setup\n");
 	printf("    --get-v4l2 pad	Print the active format on a given pad\n");
-	printf("    --set-dv pad	Configure DV timings on a given pad\n");
 	printf("-h, --help		Show verbose help and exit\n");
 	printf("-i, --interactive	Modify links interactively\n");
-	printf("-l, --links links	Comma-separated list of link descriptors to setup\n");
+	printf("-l, --links		Comma-separated list of links descriptors to setup\n");
 	printf("-p, --print-topology	Print the device topology\n");
 	printf("    --print-dot		Print the device topology as a dot graph\n");
 	printf("-r, --reset		Reset all links to inactive\n");
 	printf("-v, --verbose		Be verbose\n");
+
+	if (!verbose)
+		return;
+
 	printf("\n");
 	printf("Links and formats are defined as\n");
-	printf("\tlinks           = link { ',' link } ;\n");
 	printf("\tlink            = pad '->' pad '[' flags ']' ;\n");
 	printf("\tpad             = entity ':' pad-number ;\n");
 	printf("\tentity          = entity-number | ( '\"' entity-name '\"' ) ;\n");
@@ -80,7 +82,6 @@ static void usage(const char *argv0)
 
 #define OPT_PRINT_DOT		256
 #define OPT_GET_FORMAT		257
-#define OPT_SET_DV		258
 
 static struct option opts[] = {
 	{"device", 1, 0, 'd'},
@@ -89,7 +90,6 @@ static struct option opts[] = {
 	{"set-v4l2", 1, 0, 'V'},
 	{"get-format", 1, 0, OPT_GET_FORMAT},
 	{"get-v4l2", 1, 0, OPT_GET_FORMAT},
-	{"set-dv", 1, 0, OPT_SET_DV},
 	{"help", 0, 0, 'h'},
 	{"interactive", 0, 0, 'i'},
 	{"links", 1, 0, 'l'},
@@ -104,7 +104,7 @@ int parse_cmdline(int argc, char **argv)
 	int opt;
 
 	if (argc == 1) {
-		usage(argv[0]);
+		usage(argv[0], 0);
 		return 1;
 	}
 
@@ -125,13 +125,12 @@ int parse_cmdline(int argc, char **argv)
 		case 'f':
 			fprintf(stderr, "Warning: the -f option is deprecated "
 				"and has been replaced by -V.\n");
-			/* fall through */
 		case 'V':
 			media_opts.formats = optarg;
 			break;
 
 		case 'h':
-			usage(argv[0]);
+			usage(argv[0], 1);
 			exit(0);
 
 		case 'i':
@@ -159,11 +158,7 @@ int parse_cmdline(int argc, char **argv)
 			break;
 
 		case OPT_GET_FORMAT:
-			media_opts.fmt_pad = optarg;
-			break;
-
-		case OPT_SET_DV:
-			media_opts.dv_pad = optarg;
+			media_opts.pad = optarg;
 			break;
 
 		default:
@@ -175,4 +170,3 @@ int parse_cmdline(int argc, char **argv)
 
 	return 0;
 }
-

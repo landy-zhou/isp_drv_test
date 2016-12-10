@@ -1,7 +1,7 @@
 /*
  * Media controller test application
  *
- * Copyright (C) 2010-2014 Ideas on board SPRL
+ * Copyright (C) 2010-2011 Ideas on board SPRL
  *
  * Contact: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
  *
@@ -33,8 +33,7 @@ struct media_options
 	const char *entity;
 	const char *formats;
 	const char *links;
-	const char *fmt_pad;
-	const char *dv_pad;
+	const char *pad;
 };
 
 extern struct media_options media_opts;
@@ -42,4 +41,3 @@ extern struct media_options media_opts;
 extern int parse_cmdline(int argc, char **argv);
 
 #endif /* __OPTIONS_H */
-

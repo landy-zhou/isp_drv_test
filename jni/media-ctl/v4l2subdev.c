@@ -1,7 +1,7 @@
 /*
  * V4L2 subdev interface library
  *
- * Copyright (C) 2010-2014 Ideas on board SPRL
+ * Copyright (C) 2010-2011 Ideas on board SPRL
  *
  * Contact: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
  *
@@ -35,7 +35,6 @@
 #include <linux/v4l2-subdev.h>
 
 #include "mediactl.h"
-#include "mediactl-priv.h"
 #include "tools.h"
 #include "v4l2subdev.h"
 
@@ -46,11 +45,10 @@ int v4l2_subdev_open(struct media_entity *entity)
 
 	entity->fd = open(entity->devname, O_RDWR);
 	if (entity->fd == -1) {
-		int ret = -errno;
 		media_dbg(entity->media,
 			  "%s: Failed to open subdev device node %s\n", __func__,
 			  entity->devname);
-		return ret;
+		return -errno;
 	}
 
 	return 0;
@@ -186,78 +184,6 @@ int v4l2_subdev_set_selection(struct media_entity *entity,
 		return -errno;
 
 	*rect = u.crop.rect;
-	return 0;
-}
-
-int v4l2_subdev_get_dv_timings_caps(struct media_entity *entity,
-	struct v4l2_dv_timings_cap *caps)
-{
-	unsigned int pad = caps->pad;
-	int ret;
-
-	ret = v4l2_subdev_open(entity);
-	if (ret < 0)
-		return ret;
-
-	memset(caps, 0, sizeof(*caps));
-	caps->pad = pad;
-
-	ret = ioctl(entity->fd, VIDIOC_SUBDEV_DV_TIMINGS_CAP, caps);
-	if (ret < 0)
-		return -errno;
-
-	return 0;
-}
-
-int v4l2_subdev_query_dv_timings(struct media_entity *entity,
-	struct v4l2_dv_timings *timings)
-{
-	int ret;
-
-	ret = v4l2_subdev_open(entity);
-	if (ret < 0)
-		return ret;
-
-	memset(timings, 0, sizeof(*timings));
-
-	ret = ioctl(entity->fd, VIDIOC_SUBDEV_QUERY_DV_TIMINGS, timings);
-	if (ret < 0)
-		return -errno;
-
-	return 0;
-}
-
-int v4l2_subdev_get_dv_timings(struct media_entity *entity,
-	struct v4l2_dv_timings *timings)
-{
-	int ret;
-
-	ret = v4l2_subdev_open(entity);
-	if (ret < 0)
-		return ret;
-
-	memset(timings, 0, sizeof(*timings));
-
-	ret = ioctl(entity->fd, VIDIOC_SUBDEV_G_DV_TIMINGS, timings);
-	if (ret < 0)
-		return -errno;
-
-	return 0;
-}
-
-int v4l2_subdev_set_dv_timings(struct media_entity *entity,
-	struct v4l2_dv_timings *timings)
-{
-	int ret;
-
-	ret = v4l2_subdev_open(entity);
-	if (ret < 0)
-		return ret;
-
-	ret = ioctl(entity->fd, VIDIOC_SUBDEV_S_DV_TIMINGS, timings);
-	if (ret < 0)
-		return -errno;
-
 	return 0;
 }
 
@@ -614,7 +540,7 @@ static int set_frame_interval(struct media_entity *entity,
 static int v4l2_subdev_parse_setup_format(struct media_device *media,
 					  const char *p, char **endp)
 {
-	struct v4l2_mbus_framefmt format = { 0, 0, 0 };
+	struct v4l2_mbus_framefmt format = { 0, 0, 0 , 0, 0, {0}};
 	struct media_pad *pad;
 	struct v4l2_rect crop = { -1, -1, -1, -1 };
 	struct v4l2_rect compose = crop;
@@ -681,7 +607,7 @@ static int v4l2_subdev_parse_setup_format(struct media_device *media,
 
 int v4l2_subdev_parse_setup_formats(struct media_device *media, const char *p)
 {
-	char *end;
+	char *end = NULL;
 	int ret;
 
 	do {
@@ -724,8 +650,6 @@ static struct {
 	{ "SGBRG12", V4L2_MBUS_FMT_SGBRG12_1X12 },
 	{ "SGRBG12", V4L2_MBUS_FMT_SGRBG12_1X12 },
 	{ "SRGGB12", V4L2_MBUS_FMT_SRGGB12_1X12 },
-	{ "AYUV32", V4L2_MBUS_FMT_AYUV8_1X32 },
-	{ "ARGB32", V4L2_MBUS_FMT_ARGB8888_1X32 },
 };
 
 const char *v4l2_subdev_pixelcode_to_string(enum v4l2_mbus_pixelcode code)
@@ -755,3 +679,4 @@ enum v4l2_mbus_pixelcode v4l2_subdev_string_to_pixelcode(const char *string,
 
 	return mbus_formats[i].code;
 }
+

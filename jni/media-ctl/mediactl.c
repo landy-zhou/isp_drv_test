@@ -1,7 +1,7 @@
 /*
  * Media controller interface library
  *
- * Copyright (C) 2010-2014 Ideas on board SPRL
+ * Copyright (C) 2010-2011 Ideas on board SPRL
  *
  * Contact: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
  *
@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include "config.h"
+#include "options.h"
 
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -38,13 +38,9 @@
 #include <linux/videodev2.h>
 
 #include "mediactl.h"
-#include "mediactl-priv.h"
 #include "tools.h"
 #include "media_lib.h"
 
-/* -----------------------------------------------------------------------------
- * Graph access
- */
 
 struct media_pad *media_entity_remote_source(struct media_pad *pad)
 {
@@ -107,113 +103,6 @@ struct media_entity *media_get_entity_by_id(struct media_device *media,
 	return NULL;
 }
 
-unsigned int media_get_entities_count(struct media_device *media)
-{
-	return media->entities_count;
-}
-
-struct media_entity *media_get_entity(struct media_device *media, unsigned int index)
-{
-	if (index >= media->entities_count)
-		return NULL;
-
-	return &media->entities[index];
-}
-
-const struct media_pad *media_entity_get_pad(struct media_entity *entity, unsigned int index)
-{
-	if (index >= entity->info.pads)
-		return NULL;
-
-	return &entity->pads[index];
-}
-
-unsigned int media_entity_get_links_count(struct media_entity *entity)
-{
-	return entity->num_links;
-}
-
-const struct media_link *media_entity_get_link(struct media_entity *entity, unsigned int index)
-{
-	if (index >= entity->num_links)
-		return NULL;
-
-	return &entity->links[index];
-}
-
-const char *media_entity_get_devname(struct media_entity *entity)
-{
-	return entity->devname[0] ? entity->devname : NULL;
-}
-
-struct media_entity *media_get_default_entity(struct media_device *media,
-					      unsigned int type)
-{
-	switch (type) {
-	case MEDIA_ENT_T_DEVNODE_V4L:
-		return media->def.v4l;
-	case MEDIA_ENT_T_DEVNODE_FB:
-		return media->def.fb;
-	case MEDIA_ENT_T_DEVNODE_ALSA:
-		return media->def.alsa;
-	case MEDIA_ENT_T_DEVNODE_DVB:
-		return media->def.dvb;
-	}
-
-	return NULL;
-}
-
-const struct media_device_info *media_get_info(struct media_device *media)
-{
-	return &media->info;
-}
-
-const char *media_get_devnode(struct media_device *media)
-{
-	return media->devnode;
-}
-
-const struct media_entity_desc *media_entity_get_info(struct media_entity *entity)
-{
-	return &entity->info;
-}
-
-/* -----------------------------------------------------------------------------
- * Open/close
- */
-
-static int media_device_open(struct media_device *media)
-{
-	int ret;
-
-	if (media->fd != -1)
-		return 0;
-
-	media_dbg(media, "Opening media device %s\n", media->devnode);
-
-	media->fd = open(media->devnode, O_RDWR);
-	if (media->fd < 0) {
-		ret = -errno;
-		media_dbg(media, "%s: Can't open media device %s\n",
-			  __func__, media->devnode);
-		return ret;
-	}
-
-	return 0;
-}
-
-static void media_device_close(struct media_device *media)
-{
-	if (media->fd != -1) {
-		close(media->fd);
-		media->fd = -1;
-	}
-}
-
-/* -----------------------------------------------------------------------------
- * Link setup
- */
-
 int media_setup_link(struct media_device *media,
 		     struct media_pad *source,
 		     struct media_pad *sink,
@@ -223,10 +112,6 @@ int media_setup_link(struct media_device *media,
 	struct media_link_desc ulink;
 	unsigned int i;
 	int ret;
-
-	ret = media_device_open(media);
-	if (ret < 0)
-		goto done;
 
 	for (i = 0; i < source->entity->num_links; i++) {
 		link = &source->entity->links[i];
@@ -240,8 +125,7 @@ int media_setup_link(struct media_device *media,
 
 	if (i == source->entity->num_links) {
 		media_dbg(media, "%s: Link not found\n", __func__);
-		ret = -ENOENT;
-		goto done;
+		return -ENOENT;
 	}
 
 	/* source pad */
@@ -257,22 +141,16 @@ int media_setup_link(struct media_device *media,
 	ulink.flags = flags | (link->flags & MEDIA_LNK_FL_IMMUTABLE);
 
 	ret = ioctl(media->fd, MEDIA_IOC_SETUP_LINK, &ulink);
-    app_info("ioctl,MEDIA_IOC_SETUP_LINK, flags=0x%x",ulink.flags);
+	app_info("ioctl,MEDIA_IOC_SETUP_LINK\n");
 	if (ret == -1) {
-		ret = -errno;
 		media_dbg(media, "%s: Unable to setup link (%s)\n",
 			  __func__, strerror(errno));
-		goto done;
+		return -errno;
 	}
 
 	link->flags = ulink.flags;
 	link->twin->flags = ulink.flags;
-
-	ret = 0;
-
-done:
-	media_device_close(media);
-	return ret;
+	return 0;
 }
 
 int media_reset_links(struct media_device *media)
@@ -299,10 +177,6 @@ int media_reset_links(struct media_device *media)
 
 	return 0;
 }
-
-/* -----------------------------------------------------------------------------
- * Entities, pads and links enumeration
- */
 
 static struct media_link *media_entity_add_link(struct media_entity *entity)
 {
@@ -340,14 +214,14 @@ static int media_enum_links(struct media_device *media)
 		links.links = calloc(entity->info.links, sizeof(struct media_link_desc));
 
 		if (ioctl(media->fd, MEDIA_IOC_ENUM_LINKS, &links) < 0) {
-			ret = -errno;
 			media_dbg(media,
 				  "%s: Unable to enumerate pads and links (%s).\n",
 				  __func__, strerror(errno));
 			free(links.pads);
 			free(links.links);
-			return ret;
+			return -errno;
 		}
+		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
 
 		for (i = 0; i < entity->info.pads; ++i) {
 			entity->pads[i].entity = entity;
@@ -470,7 +344,7 @@ static int media_get_devname_sysfs(struct media_entity *entity)
 
 	sprintf(sysname, "/sys/dev/char/%u:%u", entity->info.v4l.major,
 		entity->info.v4l.minor);
-	ret = readlink(sysname, target, sizeof(target) - 1);
+	ret = readlink(sysname, target, sizeof(target));
 	if (ret < 0)
 		return -errno;
 
@@ -480,20 +354,6 @@ static int media_get_devname_sysfs(struct media_entity *entity)
 		return -EINVAL;
 
 	sprintf(devname, "/dev/%s", p + 1);
-	if (strstr(p + 1, "dvb")) {
-		char *s = p + 1;
-
-		if (strncmp(s, "dvb", 3))
-			return -EINVAL;
-		s += 3;
-		p = strchr(s, '.');
-		if (!p)
-			return -EINVAL;
-		*p = '/';
-		sprintf(devname, "/dev/dvb/adapter%s", s);
-	} else {
-		sprintf(devname, "/dev/%s", p + 1);
-	}
 	ret = stat(devname, &devstat);
 	if (ret < 0)
 		return -errno;
@@ -502,8 +362,8 @@ static int media_get_devname_sysfs(struct media_entity *entity)
 	 * Make sure the major/minor match. We should really use
 	 * libudev.
 	 */
-	if (major(devstat.st_rdev) == entity->info.v4l.major &&
-	    minor(devstat.st_rdev) == entity->info.v4l.minor)
+	if ((unsigned int)major(devstat.st_rdev) == entity->info.v4l.major &&
+	    (unsigned int)minor(devstat.st_rdev) == entity->info.v4l.minor)
 		strcpy(entity->devname, devname);
 
 	return 0;
@@ -532,6 +392,7 @@ static int media_enum_entities(struct media_device *media)
 		entity->media = media;
 
 		ret = ioctl(media->fd, MEDIA_IOC_ENUM_ENTITIES, &entity->info);
+		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
 		if (ret < 0) {
 			ret = errno != EINVAL ? -errno : 0;
 			break;
@@ -552,27 +413,9 @@ static int media_enum_entities(struct media_device *media)
 
 		media->entities_count++;
 
-		if (entity->info.flags & MEDIA_ENT_FL_DEFAULT) {
-			switch (entity->info.type) {
-			case MEDIA_ENT_T_DEVNODE_V4L:
-				media->def.v4l = entity;
-				break;
-			case MEDIA_ENT_T_DEVNODE_FB:
-				media->def.fb = entity;
-				break;
-			case MEDIA_ENT_T_DEVNODE_ALSA:
-				media->def.alsa = entity;
-				break;
-			case MEDIA_ENT_T_DEVNODE_DVB:
-				media->def.dvb = entity;
-				break;
-			}
-		}
-
 		/* Find the corresponding device name. */
 		if (media_entity_type(entity) != MEDIA_ENT_T_DEVNODE &&
-		    media_entity_type(entity) != MEDIA_ENT_T_V4L2_SUBDEV &&
-		    entity->info.type == MEDIA_ENT_T_DEVNODE_ALSA)
+		    media_entity_type(entity) != MEDIA_ENT_T_V4L2_SUBDEV)
 			continue;
 
 		/* Try to get the device name via udev */
@@ -586,58 +429,6 @@ static int media_enum_entities(struct media_device *media)
 	media_udev_close(udev);
 	return ret;
 }
-
-int media_device_enumerate(struct media_device *media)
-{
-	int ret;
-
-	if (media->entities)
-		return 0;
-
-	ret = media_device_open(media);
-	if (ret < 0)
-		return ret;
-
-	ret = ioctl(media->fd, MEDIA_IOC_DEVICE_INFO, &media->info);
-	if (ret < 0) {
-		ret = -errno;
-		media_dbg(media, "%s: Unable to retrieve media device "
-			  "information for device %s (%s)\n", __func__,
-			  media->devnode, strerror(errno));
-		goto done;
-	}
-
-	media_dbg(media, "Enumerating entities\n");
-
-	ret = media_enum_entities(media);
-	if (ret < 0) {
-		media_dbg(media,
-			  "%s: Unable to enumerate entities for device %s (%s)\n",
-			  __func__, media->devnode, strerror(-ret));
-		goto done;
-	}
-
-	media_dbg(media, "Found %u entities\n", media->entities_count);
-	media_dbg(media, "Enumerating pads and links\n");
-
-	ret = media_enum_links(media);
-	if (ret < 0) {
-		media_dbg(media,
-			  "%s: Unable to enumerate pads and linksfor device %s\n",
-			  __func__, media->devnode);
-		goto done;
-	}
-
-	ret = 0;
-
-done:
-	media_device_close(media);
-	return ret;
-}
-
-/* -----------------------------------------------------------------------------
- * Create/destroy
- */
 
 static void media_debug_default(void *ptr, ...)
 {
@@ -656,65 +447,77 @@ void media_debug_set_handler(struct media_device *media,
 	}
 }
 
-static struct media_device *__media_device_new(void)
+struct media_device *media_open_debug(
+	const char *name, void (*debug_handler)(void *, ...),
+	void *debug_priv)
 {
 	struct media_device *media;
+	int ret;
 
 	media = calloc(1, sizeof(*media));
 	if (media == NULL)
 		return NULL;
 
-	media->fd = -1;
-	media->refcount = 1;
+	media_debug_set_handler(media, debug_handler, debug_priv);
 
-	media_debug_set_handler(media, NULL, NULL);
+	media_dbg(media, "Opening media device %s\n", name);
 
-	return media;
-}
-
-struct media_device *media_device_new(const char *devnode)
-{
-	struct media_device *media;
-
-	media = __media_device_new();
-	if (media == NULL)
+	media->fd = open(name, O_RDWR);
+	if (media->fd < 0) {
+		media_close(media);
+		media_dbg(media, "%s: Can't open media device %s\n",
+			  __func__, name);
 		return NULL;
+	}
 
-	media->devnode = strdup(devnode);
-	if (media->devnode == NULL) {
-		media_device_unref(media);
+	ret = ioctl(media->fd, MEDIA_IOC_DEVICE_INFO, &media->info);
+	app_info("ioctl,MEDIA_IOC_DEVICE_INFO\n");
+	if (ret < 0) {
+		media_dbg(media, "%s: Unable to retrieve media device "
+			  "information for device %s (%s)\n", __func__,
+			  name, strerror(errno));
+		media_close(media);
+		return NULL;
+	}
+
+	media_dbg(media, "Enumerating entities\n");
+
+	ret = media_enum_entities(media);
+
+	if (ret < 0) {
+		media_dbg(media,
+			  "%s: Unable to enumerate entities for device %s (%s)\n",
+			  __func__, name, strerror(-ret));
+		media_close(media);
+		return NULL;
+	}
+
+	media_dbg(media, "Found %u entities\n", media->entities_count);
+	media_dbg(media, "Enumerating pads and links\n");
+
+	ret = media_enum_links(media);
+	if (ret < 0) {
+		media_dbg(media,
+			  "%s: Unable to enumerate pads and linksfor device %s\n",
+			  __func__, name);
+		media_close(media);
 		return NULL;
 	}
 
 	return media;
 }
 
-struct media_device *media_device_new_emulated(struct media_device_info *info)
+struct media_device *media_open(const char *name)
 {
-	struct media_device *media;
-
-	media = __media_device_new();
-	if (media == NULL)
-		return NULL;
-
-	media->info = *info;
-
-	return media;
+	return media_open_debug(name, NULL, NULL);
 }
 
-struct media_device *media_device_ref(struct media_device *media)
-{
-	media->refcount++;
-	return media;
-}
-
-void media_device_unref(struct media_device *media)
+void media_close(struct media_device *media)
 {
 	unsigned int i;
 
-	media->refcount--;
-	if (media->refcount > 0)
-		return;
+	if (media->fd != -1)
+		close(media->fd);
 
 	for (i = 0; i < media->entities_count; ++i) {
 		struct media_entity *entity = &media->entities[i];
@@ -726,65 +529,7 @@ void media_device_unref(struct media_device *media)
 	}
 
 	free(media->entities);
-	free(media->devnode);
 	free(media);
-}
-
-int media_device_add_entity(struct media_device *media,
-			    const struct media_entity_desc *desc,
-			    const char *devnode)
-{
-	struct media_entity **defent = NULL;
-	struct media_entity *entity;
-	unsigned int size;
-
-	size = (media->entities_count + 1) * sizeof(*media->entities);
-	entity = realloc(media->entities, size);
-	if (entity == NULL)
-		return -ENOMEM;
-
-	media->entities = entity;
-	media->entities_count++;
-
-	entity = &media->entities[media->entities_count - 1];
-	memset(entity, 0, sizeof *entity);
-
-	entity->fd = -1;
-	entity->media = media;
-	strncpy(entity->devname, devnode, sizeof entity->devname);
-	entity->devname[sizeof entity->devname - 1] = '\0';
-
-	entity->info.id = 0;
-	entity->info.type = desc->type;
-	entity->info.flags = 0;
-	memcpy(entity->info.name, desc->name, sizeof entity->info.name);
-
-	switch (entity->info.type) {
-	case MEDIA_ENT_T_DEVNODE_V4L:
-		defent = &media->def.v4l;
-		entity->info.v4l = desc->v4l;
-		break;
-	case MEDIA_ENT_T_DEVNODE_FB:
-		defent = &media->def.fb;
-		entity->info.fb = desc->fb;
-		break;
-	case MEDIA_ENT_T_DEVNODE_ALSA:
-		defent = &media->def.alsa;
-		entity->info.alsa = desc->alsa;
-		break;
-	case MEDIA_ENT_T_DEVNODE_DVB:
-		defent = &media->def.dvb;
-		entity->info.dvb = desc->dvb;
-		break;
-	}
-
-	if (desc->flags & MEDIA_ENT_FL_DEFAULT) {
-		entity->info.flags |= MEDIA_ENT_FL_DEFAULT;
-		if (defent)
-			*defent = entity;
-	}
-
-	return 0;
 }
 
 struct media_pad *media_parse_pad(struct media_device *media,
@@ -947,7 +692,7 @@ void media_print_streampos(struct media_device *media, const char *p,
 
 	if (pos < 0)
 		pos = 0;
-	if (pos > strlen(p))
+	if ((unsigned int)pos > strlen(p))
 		pos = strlen(p);
 
 	media_dbg(media, "\n");

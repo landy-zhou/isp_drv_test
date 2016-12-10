@@ -1,7 +1,7 @@
 /*
  * V4L2 subdev interface library
  *
- * Copyright (C) 2010-2014 Ideas on board SPRL
+ * Copyright (C) 2010-2011 Ideas on board SPRL
  *
  * Contact: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
  *
@@ -130,59 +130,6 @@ int v4l2_subdev_get_selection(struct media_entity *entity,
 int v4l2_subdev_set_selection(struct media_entity *entity,
 	struct v4l2_rect *rect, unsigned int pad, unsigned int target,
 	enum v4l2_subdev_format_whence which);
-
-/**
- * @brief Query the digital video capabilities of a pad.
- * @param entity - subdev-device media entity.
- * @param cap - capabilities to be filled.
- *
- * Retrieve the digital video capabilities of the @a entity pad specified by
- * @a cap.pad and store it in the @a cap structure.
- *
- * @return 0 on success, or a negative error code on failure.
- */
-int v4l2_subdev_get_dv_timings_caps(struct media_entity *entity,
-	struct v4l2_dv_timings_cap *caps);
-
-/**
- * @brief Query the digital video timings of a sub-device
- * @param entity - subdev-device media entity.
- * @param timings timings to be filled.
- *
- * Retrieve the detected digital video timings for the currently selected input
- * of @a entity and store them in the @a timings structure.
- *
- * @return 0 on success, or a negative error code on failure.
- */
-int v4l2_subdev_query_dv_timings(struct media_entity *entity,
-	struct v4l2_dv_timings *timings);
-
-/**
- * @brief Get the current digital video timings of a sub-device
- * @param entity - subdev-device media entity.
- * @param timings timings to be filled.
- *
- * Retrieve the current digital video timings for the currently selected input
- * of @a entity and store them in the @a timings structure.
- *
- * @return 0 on success, or a negative error code on failure.
- */
-int v4l2_subdev_get_dv_timings(struct media_entity *entity,
-	struct v4l2_dv_timings *timings);
-
-/**
- * @brief Set the digital video timings of a sub-device
- * @param entity - subdev-device media entity.
- * @param timings timings to be set.
- *
- * Set the digital video timings of @a entity to @a timings. The driver is
- * allowed to modify the requested format, in which case @a timings is updated
- * with the modifications.
- *
- * @return 0 on success, or a negative error code on failure.
- */
-int v4l2_subdev_set_dv_timings(struct media_entity *entity,
-	struct v4l2_dv_timings *timings);
 
 /**
  * @brief Retrieve the frame interval on a sub-device.

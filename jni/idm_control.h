@@ -46,11 +46,7 @@ enum idm_subdev_code {
     SDCODE_SENSOR1,
     SDCODE_VCM1,
     SDCODE_FLASH1,
-    SDCODE_MAX_CNT,
-};
-
-enum idm_vnode_code {
-    VNODE_ISP_A1W1 = 0,
+    VNODE_ISP_A1W1,
     VNODE_ISP_A1W2,
     VNODE_ISP_A1W3,
     VNODE_ISP_A1W4,
@@ -64,7 +60,7 @@ enum idm_vnode_code {
     VNODE_ISP_A2W2,
     VNODE_ISP_A2R1,
     VNODE_ISP_A2R2,
-    VNODE_MAX_CNT,
+    IDM_NODE_MAX_CNT,
 };
 
 enum aquilav1_pad_id {
@@ -94,9 +90,7 @@ enum aquilav1_pad_id {
     PAD_AXI_IN = 0,
     PAD_AXI_OUT,
     AXI_PAD_CNT,
-};
-
-enum ccic_pad_id {
+    /* ccic pads */
     CCIC_CSI_PAD_IN = 0,
     CCIC_CSI_PAD_LOCAL,
     CCIC_CSI_PAD_XFEED,
@@ -113,27 +107,32 @@ enum ccic_pad_id {
 
 #define ISPSD_PAD_MAX 15
 #define MAX_OUTPUT_PER_PIPELINE	8
-struct idm_subdev {
+
+enum idm_node_type{
+    IDM_NODE_SENSOR=0,
+    IDM_NODE_CCIC,
+    IDM_NODE_IDI,
+    IDM_NODE_PIPELINE,
+    IDM_NODE_AXIW,
+    IDM_NODE_VOUT,
+    IDM_NODE_VIN,
+};
+
+struct idm_node{
     struct media_entity	*me;
+    struct idm_node_type type;
     char   name[32];
-    struct media_pad	pads[ISPSD_PAD_MAX];
-    struct idm_PlatCam		*plat;
-    struct CamNodeOps	*ops;
-    char     open_flag;
-    int			fd;
+    //struct media_pad	pads[ISPSD_PAD_MAX];
+    struct idm_	platform *plat;
+    //struct CamNodeOps *ops;
+    char open_flag;
+    int	fd;
 };
-struct idm_vnode {
-    struct media_entity	*me;
-    char			name[32];
-    struct media_pad	pads[ISPSD_PAD_MAX];
-    struct idm_PlatCam		*plat;
-    char     open_flag;
-    int			fd;
-};
-struct idm_PlatCam {
+
+struct idm_platform {
     struct media_device	*media;
-    struct idm_subdev		*sd_node[SDCODE_MAX_CNT];
-    struct idm_vnode		*vnode[VNODE_MAX_CNT];
+    struct idm_node *nodes[IDM_NODE_MAX_CNT];
+    int node_cnt;
 };
 
 struct idm_online_topology {
@@ -145,7 +144,7 @@ struct idm_online_topology {
     struct v4l2_rect	*sd_path_crop;
     struct idm_subdev	*sd_axi_wr[MAX_OUTPUT_PER_PIPELINE];
     struct idm_vnode	*vnode_dst[MAX_OUTPUT_PER_PIPELINE];
-    int			dst_map;
+    int		dst_map;
 };
 
 struct idm_offline_topology {
@@ -155,7 +154,7 @@ struct idm_offline_topology {
     struct v4l2_rect	*sd_path_crop;
     struct idm_subdev	*sd_axi_wr[MAX_OUTPUT_PER_PIPELINE];
     struct idm_vnode	*vnode_dst[MAX_OUTPUT_PER_PIPELINE];
-    int			dst_map;
+    int	   dst_map;
 };
 
 #endif //__IDM_CONTROL_H__

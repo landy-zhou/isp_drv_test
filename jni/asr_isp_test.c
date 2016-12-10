@@ -79,7 +79,7 @@ int MediaSetupLink(struct CamNode *src,struct CamNode *dst)
 	goto exit;
     }
     app_info("node %s --> %s matched",src->name,dst->name);
-    ret = CamLinkApply(src, src->link[ret],1);
+    ret = CamLinkApply(src, src->link[ret],MEDIA_LNK_FL_ENABLED);
     if(0>ret)
     {
 	app_err("CamLinkApply %s to %s error",src->name,dst->name);
@@ -398,7 +398,7 @@ int main(int argc, char **argv)
     if (ret < 0)
 	goto exit;
 
-    sleep(3);
+    //sleep(3);
     CameraThreadKill(&out_stream[0]);
 
 exit:

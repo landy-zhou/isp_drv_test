@@ -257,7 +257,7 @@ int media_setup_link(struct media_device *media,
 	ulink.flags = flags | (link->flags & MEDIA_LNK_FL_IMMUTABLE);
 
 	ret = ioctl(media->fd, MEDIA_IOC_SETUP_LINK, &ulink);
-    app_info("ioctl,MEDIA_IOC_SETUP_LINK");
+    app_info("ioctl,MEDIA_IOC_SETUP_LINK, flags=0x%x",ulink.flags);
 	if (ret == -1) {
 		ret = -errno;
 		media_dbg(media, "%s: Unable to setup link (%s)\n",
@@ -667,7 +667,7 @@ static struct media_device *__media_device_new(void)
 	media->fd = -1;
 	media->refcount = 1;
 
-	media_debug_set_handler(media, (void (*)(void *, ...))fprintf, stdout);
+	media_debug_set_handler(media, NULL, NULL);
 
 	return media;
 }

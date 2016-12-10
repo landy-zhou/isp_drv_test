@@ -543,7 +543,7 @@ int CameraThreadKill(struct camera_stream_t *stream)
     if (stream->th_id == 0)
         goto LABEL_CLEAR;
 
-    stream->kill = 1;
+   // stream->kill = 1;
     pthread_join(stream->th_id, NULL);
     if (stream->ret < 0)
         c_err("%s: stream failed when running", stream->name);

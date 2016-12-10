@@ -76,7 +76,7 @@ int CamLinkApply(struct CamNode *node, struct CamLink *link, int flag)
     if (flag == 0)
         goto link_off;
     if (link->RefCnt == 0) {
-        app_info("try to enable link '%s => %s' ", link->mlink->source->entity->info.name,link->mlink->sink->entity->info.name);
+        app_info("try to enable link '%s => %s, flag=0x%x' ", link->mlink->source->entity->info.name,link->mlink->sink->entity->info.name, flag);
         ret = media_setup_link(node->me->media, link->mlink->source, link->mlink->sink, flag);
         if (ret < 0) {
             app_err("failed to enable link '%s => %s': %s",
@@ -621,6 +621,10 @@ struct PlatCam *MediaLibInit()
         app_err("Failed to open media node");
         goto out;
     }
+
+    media_debug_set_handler(cam->media,
+			(void (*)(void *, ...))fprintf, stdout);
+
     ret = media_device_enumerate(cam->media);
     if (ret < 0)
         goto out;

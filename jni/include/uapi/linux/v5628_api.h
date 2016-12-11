@@ -110,6 +110,7 @@ enum v4l2_priv_colorfx {
 	V4L2_PRIV_COLORFX_MAX,
 };
 
+/*
 enum aquilav1_pad_id {
 	AQUILAV1PAD_IDI_IN = 0,
 	AQUILAV1PAD_IDI_PIPE1,
@@ -148,7 +149,46 @@ enum ccic_pad_id {
 	CCIC_DMA_PAD_OUT,
 	CCIC_DMA_PAD_CNT,
 };
+*/
 
+enum aquilav1_pad_id {
+    PAD_SENSOR_OUT = 0,
+
+    PAD_IDI_IN = 0,
+    PAD_IDI_PIPE1,
+    PAD_IDI_DUMP1,
+    PAD_IDI_PIPE2,
+    PAD_IDI_DUMP2,
+    PAD_IDI_BOTH,
+    IDI_PAD_CNT,
+
+    PAD_PIPE_IN = 0,
+    PAD_PIPE_OUT,
+    PIPE_PAD_CNT,
+
+    PAD_MS_IN = 0,
+    PAD_MS_OUT,
+
+    PAD_YUVOFFLINE_IN = 0,
+    PAD_YUVOFFLINE_OUT,
+
+    PAD_PDNS_IN = 0,
+    PAD_PDNS_OUT,
+
+    PAD_AXI_IN = 0,
+    PAD_AXI_OUT,
+    AXI_PAD_CNT,
+    /* ccic pads */
+    CCIC_CSI_PAD_IN = 0,
+    CCIC_CSI_PAD_LOCAL,
+    CCIC_CSI_PAD_XFEED,
+    CCIC_CSI_PAD_ISP,
+    CCIC_CSI_PAD_CNT,
+
+    CCIC_DMA_PAD_IN = 0,
+    CCIC_DMA_PAD_OUT,
+    CCIC_DMA_PAD_CNT,
+};
 
 #define CID_AF_SNAPSHOT	1
 #define CID_AF_CONTINUOUS	2
@@ -213,6 +253,7 @@ enum ccic_pad_id {
 #define V5628_PATH_YUVOFFLINE2_NAME	"aquilav1isd-YUVOFFLINE2"
 #define V5628_PATH_PDNS_NAME	"aquilav1isd-PDNS"
 #define V5628_PATH_COMBINE_NAME	"aquilav1isd-combine"
+
 #define V5628_OUTPUT_1_NAME	"aquilav1isd-Output-1"
 #define V5628_OUTPUT_2_NAME	"aquilav1isd-Output-2"
 #define V5628_OUTPUT_3_NAME	"aquilav1isd-Output-3"
@@ -221,26 +262,34 @@ enum ccic_pad_id {
 #define V5628_OUTPUT_6_NAME	"aquilav1isd-Output-6"
 #define V5628_OUTPUT_7_NAME	"aquilav1isd-Output-7"
 #define V5628_OUTPUT_8_NAME	"aquilav1isd-Output-8"
+#define VDEV_OUTPUT_1_NAME	"vout<AQUILAV1_OUTPUT_1_NAME>"
+#define VDEV_OUTPUT_2_NAME	"vout<AQUILAV1_OUTPUT_2_NAME>"
+#define VDEV_OUTPUT_3_NAME	"vout<AQUILAV1_OUTPUT_3_NAME>"
+#define VDEV_OUTPUT_4_NAME	"vout<AQUILAV1_OUTPUT_4_NAME>"
+#define VDEV_OUTPUT_5_NAME	"vout<AQUILAV1_OUTPUT_5_NAME>"
+#define VDEV_OUTPUT_6_NAME	"vout<AQUILAV1_OUTPUT_6_NAME>"
+#define VDEV_OUTPUT_7_NAME	"vout<AQUILAV1_OUTPUT_7_NAME>"
+#define VDEV_OUTPUT_8_NAME	"vout<AQUILAV1_OUTPUT_8_NAME>"
+
 #define V5628_INPUT_1_NAME	"aquilav1isd-Input-1"
 #define V5628_INPUT_2_NAME	"aquilav1isd-Input-2"
 #define V5628_INPUT_3_NAME	"aquilav1isd-Input-3"
 #define V5628_INPUT_4_NAME	"aquilav1isd-Input-4"
 #define V5628_INPUT_5_NAME	"aquilav1isd-Input-5"
 #define V5628_INPUT_6_NAME	"aquilav1isd-Input-6"
-#define VDEV_INPUT_1_NAME	"vin<"AQUILAV1_INPUT_1_NAME">"
-#define VDEV_INPUT_2_NAME	"vin<"AQUILAV1_INPUT_2_NAME">"
-#define VDEV_INPUT_3_NAME	"vin<"AQUILAV1_INPUT_3_NAME">"
-#define VDEV_INPUT_4_NAME	"vin<"AQUILAV1_INPUT_4_NAME">"
-#define VDEV_INPUT_5_NAME	"vin<"AQUILAV1_INPUT_5_NAME">"
-#define VDEV_INPUT_6_NAME	"vin<"AQUILAV1_INPUT_6_NAME">"
+#define VDEV_INPUT_1_NAME	"vin<AQUILAV1_INPUT_1_NAME>"
+#define VDEV_INPUT_2_NAME	"vin<AQUILAV1_INPUT_2_NAME>"
+#define VDEV_INPUT_3_NAME	"vin<AQUILAV1_INPUT_3_NAME>"
+#define VDEV_INPUT_4_NAME	"vin<AQUILAV1_INPUT_4_NAME>"
+#define VDEV_INPUT_5_NAME	"vin<AQUILAV1_INPUT_5_NAME>"
+#define VDEV_INPUT_6_NAME	"vin<AQUILAV1_INPUT_6_NAME>"
 
 #define V5628_SENSOR_OV8856_NAME	"sensor:ovt.ov8856"
 #define V5628_VCM_PDRV_NAME	"vcm-pdrv"
 #define V5628_FLASH_PDRV_NAME	"flash-pdrv"
 #define V5628_CCIC_CSI0_NAME	"ccic-csi #0"
 #define V5628_CCIC_DMA_NAME	"ccic-dma #0"
-//#define V5628_IDI1_NAME	"aquilav1isd-IDI1"
-//#define V5628_IDI2_NAME	"aquilav1isd-IDI2"
+
 
 
 /* the specific controls */

@@ -7,6 +7,14 @@
 #ifndef __IDM_CONTROL_H__
 #define __IDM_CONTROL_H__
 
+#include <stdio.h>
+#include "mediactl.h"
+#include "v4l2subdev.h"
+#include <linux/v5628_api.h>
+#include <linux/v4l2-subdev.h>
+
+#define IDM_DEBUG_EN
+
 enum idm_subdev_code {
     SDCODE_ISP_IDI1	= 0,
     SDCODE_ISP_IDI2,
@@ -63,43 +71,80 @@ enum idm_subdev_code {
     IDM_NODE_MAX_CNT,
 };
 
-enum aquilav1_pad_id {
-    PAD_SENSOR_OUT = 0,
+struct node_code_map{
+    enum idm_subdev_code code;
+    char *name;
+};
 
-    PAD_IDI_IN = 0,
-    PAD_IDI_PIPE1,
-    PAD_IDI_DUMP1,
-    PAD_IDI_PIPE2,
-    PAD_IDI_DUMP2,
-    PAD_IDI_BOTH,
-    IDI_PAD_CNT,
+static char *idm_sensor_name[] = {  //sensor
+    V5628_SENSOR_OV8856_NAME
+};
 
-    PAD_PIPE_IN = 0,
-    PAD_PIPE_OUT,
-    PIPE_PAD_CNT,
+static char *idm_ccic_name[] = {    //ccic
+    V5628_CCIC_CSI0_NAME,
+    V5628_CCIC_DMA_NAME
+};
 
-    PAD_MS_IN = 0,
-    PAD_MS_OUT,
+static char *v5628_idi_name[] = {   //idi
+    V5628_IDI1_NAME,
+    V5628_IDI2_NAME
+};
 
-    PAD_YUVOFFLINE_IN = 0,
-    PAD_YUVOFFLINE_OUT,
+static char *idm_pipeline_name[] = { //isp pipeline
+    V5628_PATH_YUV_1_NAME,
+    V5628_PATH_RAW_1_NAME,
+    V5628_PATH_M2M_1_NAME,
+    V5628_PATH_YUV_2_NAME,
+    V5628_PATH_RAW_2_NAME,
+    V5628_PATH_M2M_2_NAME,
+    V5628_PATH_COMBINE_NAME,
+    V5628_PATH_HIGHSPEED_NAME,  
+    V5628_PATH_HDRPROCESS_NAME,
+    V5628_PATH_3DSTEREO_NAME,
+    V5628_PATH_YUVOFFLINE1_NAME,
+    V5628_PATH_YUVOFFLINE2_NAME,
+    V5628_PATH_PDNS_NAME,
+    V5628_PATH_COMBINE_NAME
+};
 
-    PAD_PDNS_IN = 0,
-    PAD_PDNS_OUT,
+static char *idm_axiw_name[] = {    //axi write port
+    V5628_OUTPUT_1_NAME,
+    V5628_OUTPUT_2_NAME,
+    V5628_OUTPUT_3_NAME,
+    V5628_OUTPUT_4_NAME,
+    V5628_OUTPUT_5_NAME,
+    V5628_OUTPUT_6_NAME,
+    V5628_OUTPUT_7_NAME,
+    V5628_OUTPUT_8_NAME
+};
 
-    PAD_AXI_IN = 0,
-    PAD_AXI_OUT,
-    AXI_PAD_CNT,
-    /* ccic pads */
-    CCIC_CSI_PAD_IN = 0,
-    CCIC_CSI_PAD_LOCAL,
-    CCIC_CSI_PAD_XFEED,
-    CCIC_CSI_PAD_ISP,
-    CCIC_CSI_PAD_CNT,
+static char *idm_vout_name[] = {  //video device capture (isp output)
+    VDEV_OUTPUT_1_NAME,
+    VDEV_OUTPUT_2_NAME,
+    VDEV_OUTPUT_3_NAME,
+    VDEV_OUTPUT_4_NAME,
+    VDEV_OUTPUT_5_NAME,
+    VDEV_OUTPUT_6_NAME,
+    VDEV_OUTPUT_7_NAME,
+    VDEV_OUTPUT_8_NAME
+};
 
-    CCIC_DMA_PAD_IN = 0,
-    CCIC_DMA_PAD_OUT,
-    CCIC_DMA_PAD_CNT,
+static char *idm_axir_name[] = {    //axi read port
+    V5628_INPUT_1_NAME,
+    V5628_INPUT_2_NAME,
+    V5628_INPUT_3_NAME,
+    V5628_INPUT_4_NAME,
+    V5628_INPUT_5_NAME,
+    V5628_INPUT_6_NAME,
+};
+
+static char *idm_vin_name[] = {  //video device output (isp input)
+    VDEV_INPUT_1_NAME,
+    VDEV_INPUT_2_NAME,
+    VDEV_INPUT_3_NAME,
+    VDEV_INPUT_4_NAME,
+    VDEV_INPUT_5_NAME,
+    VDEV_INPUT_6_NAME,
 };
 
 #define MEDIA_LNK_FL_ENABLED		(1)
@@ -113,17 +158,20 @@ enum idm_node_type{
     IDM_NODE_CCIC,
     IDM_NODE_IDI,
     IDM_NODE_PIPELINE,
-    IDM_NODE_AXIW,
+    IDM_NODE_AXIW, //output port
+    IDM_NODE_AXIR, //input port
     IDM_NODE_VOUT,
     IDM_NODE_VIN,
 };
 
+//struct idm_platform;
+
 struct idm_node{
     struct media_entity	*me;
-    struct idm_node_type type;
+    enum idm_node_type type;
     char   name[32];
     //struct media_pad	pads[ISPSD_PAD_MAX];
-    struct idm_	platform *plat;
+    struct idm_platform *plat;
     //struct CamNodeOps *ops;
     char open_flag;
     int	fd;
@@ -132,7 +180,7 @@ struct idm_node{
 struct idm_platform {
     struct media_device	*media;
     struct idm_node *nodes[IDM_NODE_MAX_CNT];
-    int node_cnt;
+    int node_num;
 };
 
 struct idm_online_topology {
@@ -156,6 +204,34 @@ struct idm_offline_topology {
     struct idm_vnode	*vnode_dst[MAX_OUTPUT_PER_PIPELINE];
     int	   dst_map;
 };
+
+int idm_ctrl_init(void);
+
+
+#ifdef IDM_DEBUG_EN 
+
+#define idm_err(format, arg...)		\
+	do { \
+	printf("[app:ERROR]: " format "\n", ## arg); \
+	fflush(stdout); \
+	} while (0)
+#define idm_warn(format, arg...)		\
+	do { \
+	printf("[app:WARNING]: " format "\n", ## arg); \
+	fflush(stdout); \
+	} while (0)
+#define idm_info(format, arg...)		\
+	do { \
+	printf("[app:INFO][%s]: " format "\n",__FUNCTION__, ## arg); \
+	fflush(stdout); \
+	} while (0)
+
+#else
+
+#define idm_err(format, arg...)	    do{}while(0)	
+#define idm_warn(format, arg...)    do{}while(0)	
+#define idm_info(format, arg...)	do{}while(0)
+#endif
 
 #endif //__IDM_CONTROL_H__
 

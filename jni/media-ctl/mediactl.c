@@ -432,6 +432,7 @@ static int media_enum_entities(struct media_device *media)
 
 static void media_debug_default(void *ptr, ...)
 {
+	//printf(__VA_ARGS__);
 }
 
 void media_debug_set_handler(struct media_device *media,

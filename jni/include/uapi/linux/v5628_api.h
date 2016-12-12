@@ -3,44 +3,44 @@
  * All Rights Reserved
 ******************************************************************************/
 
-#ifndef _V5628_API_H
-#define _V5628_API_H
+#ifndef _AQUILAV1_API_H
+#define _AQUILAV1_API_H
 
 #include <linux/videodev2.h>
 
 #define NR_METERING_WIN_WEIGHT 13
-#define V5628_NR_PIPELINE_MAX 2
+#define AQUILAV1_NR_PIPELINE_MAX 2
 
-struct v5628_regval {
+struct aquilav1_regval {
 	__u32	reg;
 	__u32	val;
 };
 
-struct v5628_data_node {
+struct aquilav1_data_node {
 	__u32	size;
 	void	*buffer;
 };
 
-struct v5628isp_profile {
+struct aquilav1_isp_profile {
 	unsigned int profile_id;
 	void	*arg;
 };
 
-struct v5628isp_win {
+struct aquilav1_isp_win {
 	__s32 left;
 	__s32 top;
 	__s32 right;
 	__s32 bottom;
 };
 
-struct v5628isp_expo_metering {
+struct aquilav1_isp_expo_metering {
 	unsigned int mode;
-	struct v5628isp_win stat_win;
+	struct aquilav1_isp_win stat_win;
 	struct v4l2_rect center_win;
 	unsigned int win_weight[NR_METERING_WIN_WEIGHT];
 };
 
-struct v5628isp_awb_gain {
+struct aquilav1_isp_awb_gain {
 	int write;
 	unsigned int b;
 	unsigned int gb;
@@ -60,7 +60,7 @@ enum adv_dns_type {
 	ADV_DNS_MAX,
 };
 
-struct v5628isp_adv_dns {
+struct aquilav1_isp_adv_dns {
 	enum adv_dns_type type;
 	unsigned int times;
 };
@@ -78,7 +78,7 @@ enum type_combo {
 	TYPE_COMBO_CNT,
 };
 
-struct v5628isp_path_arg {
+struct aquilav1_isp_path_arg {
 	enum type_aeag	aeag;
 	enum type_combo	combo;
 	__u16		nr_frame;
@@ -87,7 +87,7 @@ struct v5628isp_path_arg {
 	__u16		linear_yuv;
 };
 
-struct v5628isp_anti_shake_arg {
+struct aquilav1_isp_anti_shake_arg {
 	__u16		block_size;
 	int			enable;
 };
@@ -238,30 +238,30 @@ enum aquilav1_pad_id {
 #define V4L2_CID_SENSOR_OTP_CONTROL_LENC	0x02
 
 /* entity component names */
-#define V5628_IDI1_NAME		"aquilav1isd-IDI1"
-#define V5628_IDI2_NAME		"aquilav1isd-IDI2"
-#define V5628_PATH_YUV_1_NAME	"aquilav1isd-Pipeline#1"
-#define V5628_PATH_YUV_2_NAME	"aquilav1isd-Pipeline#2"
-#define V5628_PATH_RAW_1_NAME	"aquilav1isd-DataDump#1"
-#define V5628_PATH_RAW_2_NAME	"aquilav1isd-DataDump#2"
-#define V5628_PATH_M2M_1_NAME	"aquilav1isd-MemorySensor#1"
-#define V5628_PATH_M2M_2_NAME	"aquilav1isd-MemorySensor#2"
-#define V5628_PATH_HIGHSPEED_NAME	"aquilav1isd-HighSpeed"
-#define V5628_PATH_HDRPROCESS_NAME	"aquilav1isd-HDRProcess"
-#define V5628_PATH_3DSTEREO_NAME	"aquilav1isd-3DStereo"
-#define V5628_PATH_YUVOFFLINE1_NAME	"aquilav1isd-YUVOFFLINE1"
-#define V5628_PATH_YUVOFFLINE2_NAME	"aquilav1isd-YUVOFFLINE2"
-#define V5628_PATH_PDNS_NAME	"aquilav1isd-PDNS"
-#define V5628_PATH_COMBINE_NAME	"aquilav1isd-combine"
+#define AQUILAV1_IDI1_NAME		"aquilav1isd-IDI1"
+#define AQUILAV1_IDI2_NAME		"aquilav1isd-IDI2"
+#define AQUILAV1_PATH_YUV_1_NAME	"aquilav1isd-Pipeline#1"
+#define AQUILAV1_PATH_YUV_2_NAME	"aquilav1isd-Pipeline#2"
+#define AQUILAV1_PATH_RAW_1_NAME	"aquilav1isd-DataDump#1"
+#define AQUILAV1_PATH_RAW_2_NAME	"aquilav1isd-DataDump#2"
+#define AQUILAV1_PATH_M2M_1_NAME	"aquilav1isd-MemorySensor#1"
+#define AQUILAV1_PATH_M2M_2_NAME	"aquilav1isd-MemorySensor#2"
+#define AQUILAV1_PATH_HIGHSPEED_NAME	"aquilav1isd-HighSpeed"
+#define AQUILAV1_PATH_HDRPROCESS_NAME	"aquilav1isd-HDRProcess"
+#define AQUILAV1_PATH_3DSTEREO_NAME	"aquilav1isd-3DStereo"
+#define AQUILAV1_PATH_YUVOFFLINE1_NAME	"aquilav1isd-YUVOFFLINE1"
+#define AQUILAV1_PATH_YUVOFFLINE2_NAME	"aquilav1isd-YUVOFFLINE2"
+#define AQUILAV1_PATH_PDNS_NAME	"aquilav1isd-PDNS"
+#define AQUILAV1_PATH_COMBINE_NAME	"aquilav1isd-combine"
 
-#define V5628_OUTPUT_1_NAME	"aquilav1isd-Output-1"
-#define V5628_OUTPUT_2_NAME	"aquilav1isd-Output-2"
-#define V5628_OUTPUT_3_NAME	"aquilav1isd-Output-3"
-#define V5628_OUTPUT_4_NAME	"aquilav1isd-Output-4"
-#define V5628_OUTPUT_5_NAME	"aquilav1isd-Output-5"
-#define V5628_OUTPUT_6_NAME	"aquilav1isd-Output-6"
-#define V5628_OUTPUT_7_NAME	"aquilav1isd-Output-7"
-#define V5628_OUTPUT_8_NAME	"aquilav1isd-Output-8"
+#define AQUILAV1_OUTPUT_1_NAME	"aquilav1isd-Output-1"
+#define AQUILAV1_OUTPUT_2_NAME	"aquilav1isd-Output-2"
+#define AQUILAV1_OUTPUT_3_NAME	"aquilav1isd-Output-3"
+#define AQUILAV1_OUTPUT_4_NAME	"aquilav1isd-Output-4"
+#define AQUILAV1_OUTPUT_5_NAME	"aquilav1isd-Output-5"
+#define AQUILAV1_OUTPUT_6_NAME	"aquilav1isd-Output-6"
+#define AQUILAV1_OUTPUT_7_NAME	"aquilav1isd-Output-7"
+#define AQUILAV1_OUTPUT_8_NAME	"aquilav1isd-Output-8"
 #define VDEV_OUTPUT_1_NAME	"vout<AQUILAV1_OUTPUT_1_NAME>"
 #define VDEV_OUTPUT_2_NAME	"vout<AQUILAV1_OUTPUT_2_NAME>"
 #define VDEV_OUTPUT_3_NAME	"vout<AQUILAV1_OUTPUT_3_NAME>"
@@ -271,12 +271,12 @@ enum aquilav1_pad_id {
 #define VDEV_OUTPUT_7_NAME	"vout<AQUILAV1_OUTPUT_7_NAME>"
 #define VDEV_OUTPUT_8_NAME	"vout<AQUILAV1_OUTPUT_8_NAME>"
 
-#define V5628_INPUT_1_NAME	"aquilav1isd-Input-1"
-#define V5628_INPUT_2_NAME	"aquilav1isd-Input-2"
-#define V5628_INPUT_3_NAME	"aquilav1isd-Input-3"
-#define V5628_INPUT_4_NAME	"aquilav1isd-Input-4"
-#define V5628_INPUT_5_NAME	"aquilav1isd-Input-5"
-#define V5628_INPUT_6_NAME	"aquilav1isd-Input-6"
+#define AQUILAV1_INPUT_1_NAME	"aquilav1isd-Input-1"
+#define AQUILAV1_INPUT_2_NAME	"aquilav1isd-Input-2"
+#define AQUILAV1_INPUT_3_NAME	"aquilav1isd-Input-3"
+#define AQUILAV1_INPUT_4_NAME	"aquilav1isd-Input-4"
+#define AQUILAV1_INPUT_5_NAME	"aquilav1isd-Input-5"
+#define AQUILAV1_INPUT_6_NAME	"aquilav1isd-Input-6"
 #define VDEV_INPUT_1_NAME	"vin<AQUILAV1_INPUT_1_NAME>"
 #define VDEV_INPUT_2_NAME	"vin<AQUILAV1_INPUT_2_NAME>"
 #define VDEV_INPUT_3_NAME	"vin<AQUILAV1_INPUT_3_NAME>"
@@ -284,11 +284,11 @@ enum aquilav1_pad_id {
 #define VDEV_INPUT_5_NAME	"vin<AQUILAV1_INPUT_5_NAME>"
 #define VDEV_INPUT_6_NAME	"vin<AQUILAV1_INPUT_6_NAME>"
 
-#define V5628_SENSOR_OV8856_NAME	"sensor:ovt.ov8856"
-#define V5628_VCM_PDRV_NAME	"vcm-pdrv"
-#define V5628_FLASH_PDRV_NAME	"flash-pdrv"
-#define V5628_CCIC_CSI0_NAME	"ccic-csi #0"
-#define V5628_CCIC_DMA_NAME	"ccic-dma #0"
+#define AQUILAV1_SENSOR_OV8856_NAME	"sensor:ovt.ov8856"
+#define AQUILAV1_VCM_PDRV_NAME	"vcm-pdrv"
+#define AQUILAV1_FLASH_PDRV_NAME	"flash-pdrv"
+#define AQUILAV1_CCIC_CSI0_NAME	"ccic-csi #0"
+#define AQUILAV1_CCIC_DMA_NAME	"ccic-dma #0"
 
 
 
@@ -326,25 +326,25 @@ enum aquilav1_pad_id {
 
 
 #define VIDIOC_PRIVATE_AQUILAV1ISP_TOPOLOGY_SNAPSHOT \
-	_IOWR('V', BASE_VIDIOC_PRIVATE + 0, struct v5628isp_profile)
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 0, struct aquilav1_isp_profile)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_AF_WINDONW \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 1, struct v4l2_rect)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_EXPO_METERING_MODE \
-	_IOW('V', BASE_VIDIOC_PRIVATE + 2, struct v5628isp_expo_metering)
+	_IOW('V', BASE_VIDIOC_PRIVATE + 2, struct aquilav1_isp_expo_metering)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_EXPO_METERING_ROI \
-	_IOW('V', BASE_VIDIOC_PRIVATE + 3, struct v5628isp_win)
+	_IOW('V', BASE_VIDIOC_PRIVATE + 3, struct aquilav1_isp_win)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_DOWNLOAD_CTDATA \
-	_IOWR('V', BASE_VIDIOC_PRIVATE + 4, struct v5628_data_node)
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 4, struct aquilav1_data_node)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_UPLOAD_CTDATA \
-	_IOWR('V', BASE_VIDIOC_PRIVATE + 5, struct v5628_data_node)
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 5, struct aquilav1_data_node)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_AWB_GAIN \
-	_IOWR('V', BASE_VIDIOC_PRIVATE + 6, struct v5628isp_awb_gain)
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 6, struct aquilav1_isp_awb_gain)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_MEMORY_SENSOR \
 	_IOW('V', BASE_VIDIOC_PRIVATE + 7, struct memory_sensor)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_CONFIG_ADV_DNS \
-	_IOW('V', BASE_VIDIOC_PRIVATE + 8, struct v5628isp_adv_dns)
+	_IOW('V', BASE_VIDIOC_PRIVATE + 8, struct aquilav1_isp_adv_dns)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_SET_PATH_ARG \
-	_IOW('V', BASE_VIDIOC_PRIVATE + 9, struct v5628isp_path_arg)
+	_IOW('V', BASE_VIDIOC_PRIVATE + 9, struct aquilav1_isp_path_arg)
 #define VIDIOC_PRIVATE_AQUILAV1ISP_ANTI_SHAKE\
-	_IOW('V', BASE_VIDIOC_PRIVATE + 10, struct v5628isp_anti_shake_arg)
-#endif /* _V5628_API_H */
+	_IOW('V', BASE_VIDIOC_PRIVATE + 10, struct aquilav1_isp_anti_shake_arg)
+#endif /* _AQUILAV1_API_H */

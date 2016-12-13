@@ -19,6 +19,7 @@
 
 #include <linux/v5628_api.h>
 #include "tools.h"
+#include "idm_utils.h"
 #include "idm_control.h"
 
 void case_online_test(void)
@@ -31,9 +32,8 @@ void case_online_test(void)
     idm_ctl_enable_link_by_id(SD_ID_ISP_PIPE1, SD_ID_ISP_A1W1);
     idm_ctl_enable_link_by_id(SD_ID_ISP_A1W1, VD_ID_ISP_A1W1);
                                     
-    //set size/formt/crop
-
-    struct idm_fmt_crop online_fmts[] = {
+    //set size/formt/crop for subdev
+    struct idm_sd_fmt online_sd_fmts[] = {
             { 
                 .dev_id = SD_ID_SENSOR0,
                 .which	= V4L2_SUBDEV_FORMAT_ACTIVE,
@@ -86,7 +86,7 @@ void case_online_test(void)
                 .width	= 3264,
                 .height	= 2448,
                 //.code	= V4L2_MBUS_FMT_NV12_1X12,
-                .ops	= IDM_APPLY_CROP | IDM_APPLY_FMT,
+                .ops	= (IDM_APPLY_CROP | IDM_APPLY_FMT),
             },
             {
                 .dev_id = SD_ID_ISP_PIPE1,
@@ -101,7 +101,7 @@ void case_online_test(void)
                 .width	= 3264,
                 .height	= 2448,
                 //.code	= V4L2_MBUS_FMT_NV12_1X12,
-                .ops	= IDM_APPLY_CROP | IDM_APPLY_FMT,
+                .ops	= (IDM_APPLY_CROP | IDM_APPLY_FMT),
             },
             {
                 .dev_id = SD_ID_ISP_A1W1,
@@ -116,7 +116,7 @@ void case_online_test(void)
                 .code	= V4L2_MBUS_FMT_NV12_1X12,
                 .width	= 3264,
                 .height	= 2448,
-                .ops	= (1 << IDM_APPLY_CROP)|(1 << IDM_APPLY_FMT),
+                .ops	=  (IDM_APPLY_CROP | IDM_APPLY_FMT),
             },
             {
                 .dev_id = SD_ID_ISP_A1W1,
@@ -131,15 +131,39 @@ void case_online_test(void)
                 .code	= V4L2_MBUS_FMT_NV12_1X12,
                 .width	= 640,
                 .height	= 480,
-                .ops	= (1 << IDM_APPLY_CROP)|(1 << IDM_APPLY_FMT),
+                .ops	= (IDM_APPLY_CROP | IDM_APPLY_FMT),
             },
     };
-    ret = idm_ctl_set_fmts(online_fmts, ARRAY_SIZE(online_fmts));
+    ret = idm_ctl_sd_set_fmts(online_sd_fmts, ARRAY_SIZE(online_sd_fmts));
     if(0 > ret){
         idm_err("online set fmts error");
         return;
     }
 
+    //set video device fmts
+    struct idm_vd_fmt online_vd_fmts[] = {
+        [0] = {
+            .dev_id = VD_ID_ISP_A1W1,
+            .name = {"Output1"},
+            .width = 640,
+            .height = 480,
+            .pix_fmt= V4L2_PIX_FMT_NV12M,
+        },
+    };
+    ret = idm_ctl_vd_set_fmts(&online_vd_fmts[0],ARRAY_SIZE(online_vd_fmts));
+    if(0 > ret){
+        idm_err("online video device set fmt error");
+        return;
+    }
+/*
+    struct idm_buf_info online_vd_buf = {
+            .buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+            .memory = V4L2_MEMORY_DMABUF,
+            .nr_buf = 3;
+    };
+
+    idm_ctl_vd_reqbuf(idm_ctl_find_node_by_id(VD_ID_ISP_A1W1), &online_vd_buf);
+*/
     //set snopshot enable ioctl
     ret = idm_ctl_trig_snapshot(SD_ID_ISP_PIPE1);
     if(0 > ret){

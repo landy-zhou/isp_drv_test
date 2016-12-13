@@ -14,7 +14,7 @@ extern "C" {
 #include <sys/poll.h>
 #include "linux/videodev2.h"
 
-#define BUILD_OPTION_DEBUG_DUMP_V4L2_CALLING
+#define BUILD_OPTION_DEBUG_DUMP_V4L2_CALLING 1
 
 int __idm_ioctl( int device, int cmd, void* data,
                const char *str_device, const char *str_cmd, const char *str_data,

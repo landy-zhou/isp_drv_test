@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 
 #include "idm_utils.h"
+#include "idm_v4l2.h"
 
 int __idm_ioctl( int device, int cmd, void *data, const char *str_device, 
         const char *str_cmd, const char *str_data,const char *file, int line )
@@ -44,10 +45,11 @@ int __idm_ioctl( int device, int cmd, void *data, const char *str_device,
 		break;
 
 	case VIDIOC_S_FMT:
-        int is_multi_plane = 0;
-        int type = ((struct v4l2_format*)data)->type;
-        if((V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE == type) || (V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE == type))
-            is_multi_plane = 1;
+	{
+		int is_multi_plane = 0;
+		int type = ((struct v4l2_format*)data)->type;
+		if((V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE == type) || (V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE == type))
+			is_multi_plane = 1;
 
 		idm_info( "*(struct v4l2_format*)(%s) = {\n", str_data );
 		idm_info( "\t.type                    = %d,\n", ((struct v4l2_format*)data)->type );
@@ -66,6 +68,7 @@ int __idm_ioctl( int device, int cmd, void *data, const char *str_device,
 			idm_info( "}\n" );
 		}
 		break;
+	}
 
 	case VIDIOC_REQBUFS:
 		idm_info( "*(struct v4l2_requestbuffers*)(%s) = {\n", str_data );

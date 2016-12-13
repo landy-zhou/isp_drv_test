@@ -8,8 +8,8 @@
 #define _CAMERA_DRIVER_INTERFACE_H_
 
 
-#include "include/camera_core.h"
-
+#include "camera_core.h"
+#include "sys/poll.h"
 
 #ifdef __cplusplus
     extern "C" {
@@ -18,66 +18,78 @@
 
 /* ------------------------------------------------------------------------ */
 
+typedef enum {
+    CC_ISP_BUFFER_OK,
+    CC_ISP_BUFFER_CANCEL,
+} CCISPBuffStatus;
 
 typedef struct {
-    CCImageFormat format;
-    CCSize size;
-    int fd;
-    int zoomRatio;
-    int cropFlag;
+    CCImageInfo common;
+    int32_t zoomFlag;
+    int32_t cropFlag;
+
+    int32_t fd;
 } CCISPBuffInfo;
 
 typedef struct
 {
-    int frameId;
-    CCSize size;
-    CCImageFormat format;
+    CCImageInfo common;
+    int32_t zoomFlag;
+    int32_t cropFlag;
+
+    int32_t frameId;
     uint8_t* addr;
+    CCISPBuffStatus buffStatus;
 } CCISPImageBuffer;
 
 
 typedef struct {
-    int inputNum;
+    uint32_t inputNum;
     CCISPBuffInfo inputBuffConfig[MAX_CONNECTIONS_PER_NODE];
 
-    int outputNum;
+    uint32_t outputNum;
     CCISPBuffInfo outputBuffConfig[MAX_CONNECTIONS_PER_NODE];
 
-    int tmpNum;
+    uint32_t tmpNum;
     CCISPBuffInfo tmpBuffConfig[MAX_CONNECTIONS_PER_NODE];
+
+    uint32_t zoomRatio;
 } CCISPProcessPara;
 
 typedef struct {
     CCISPProcessPara processConfig[MAX_NUM_PER_PROCESS_ID];
-    int totalProcessNum;
-    CCProcessNodeType processId;
+    uint32_t totalProcessNum;
+    CCProcessNodeType processType;
+    uint32_t bufDepth; //buffer queue size of every video device
 } CCISPConfig;
 
 typedef struct {
+    CCHandle commonHandle;
 
-} CCISPState;
+    void* privateHandle;
+} CCISPHandle;
 
-CCError CCISPInit(CCISPState** ispState);
+CCError CCISPInit(CCHandle** ispHandle);
 
-CCError CCISPDeInit(CCISPState* ispState);
+CCError CCISPDeInit(CCHandle* ispHandle);
 
-CCError CCISPConfigContext(CCISPState* ispState, CCISPConfig* processConfig, int processNum);
+CCError CCISPConfigContext(CCHandle* ispHandle, CCISPConfig* processConfig, int processNum);
 
-CCError CCISPGetDeviceSource(CCISPState* ispState, CCISPConfig* config);
+CCError CCISPGetDeviceSource(CCHandle* ispHandle, CCISPConfig* config);
 
-CCError CCISPProcessOn(CCISPState* ispState, CCProcessNodeType processId, CCISPProcessPara* para);
+CCError CCISPProcessOn(CCHandle* ispHandle, CCProcessNodeType processType, CCISPProcessPara* para);
 
-CCError CCISPProcessOff(CCISPState* ispState, CCProcessNodeType processId, CCISPProcessPara* para);
+CCError CCISPProcessOff(CCHandle* ispHandle, CCProcessNodeType processType, CCISPProcessPara* para);
 
-CCError CCISPV4l2Poll(CCISPState* ispState, int fd, int timeout, int* result);
+CCError CCISPV4l2Poll(CCHandle* ispHandle, struct pollfd fds[], int numFd, int timeout, int* result);
 
-CCError CCISPV4l2Enqueue(CCISPState* ispState, int fd, CCISPImageBuffer* imgBuf);
+CCError CCISPV4l2Enqueue(CCHandle* ispHandle, int fd, CCISPImageBuffer* imgBuf);
 
-CCError CCISPV4l2Dequeue(CCISPState* ispState, int fd, CCISPImageBuffer** imgBuf);
+CCError CCISPV4l2Dequeue(CCHandle* ispHandle, int fd, CCISPImageBuffer* imgBuf);
 
-CCError CCISPV4l2Flush(CCISPState* ispState, int fd);
+CCError CCISPV4l2Flush(CCHandle* ispHandle, int fd);
 
-CCError CCISPV4l2Config(CCISPState* ispState, int fd, CCISPBuffInfo* buffConfig);
+CCError CCISPV4l2Config(CCHandle* ispHandle, int fd, CCISPBuffInfo* buffConfig);
 
 
 /* ------------------------------------------------------------------------ */

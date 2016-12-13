@@ -39,7 +39,8 @@
 
 #include "mediactl.h"
 #include "tools.h"
-#include "media_lib.h"
+//#include "media_lib.h"
+#include "idm_v4l2.h"
 
 
 struct media_pad *media_entity_remote_source(struct media_pad *pad)
@@ -140,8 +141,7 @@ int media_setup_link(struct media_device *media,
 
 	ulink.flags = flags | (link->flags & MEDIA_LNK_FL_IMMUTABLE);
 
-	ret = ioctl(media->fd, MEDIA_IOC_SETUP_LINK, &ulink);
-	app_info("ioctl,MEDIA_IOC_SETUP_LINK\n");
+	ret = idm_ioctl(media->fd, MEDIA_IOC_SETUP_LINK, &ulink);
 	if (ret == -1) {
 		media_dbg(media, "%s: Unable to setup link (%s)\n",
 			  __func__, strerror(errno));
@@ -213,7 +213,7 @@ static int media_enum_links(struct media_device *media)
 		links.pads = calloc(entity->info.pads, sizeof(struct media_pad_desc));
 		links.links = calloc(entity->info.links, sizeof(struct media_link_desc));
 
-		if (ioctl(media->fd, MEDIA_IOC_ENUM_LINKS, &links) < 0) {
+		if (idm_ioctl(media->fd, MEDIA_IOC_ENUM_LINKS, &links) < 0) {
 			media_dbg(media,
 				  "%s: Unable to enumerate pads and links (%s).\n",
 				  __func__, strerror(errno));
@@ -221,7 +221,6 @@ static int media_enum_links(struct media_device *media)
 			free(links.links);
 			return -errno;
 		}
-		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
 
 		for (i = 0; i < entity->info.pads; ++i) {
 			entity->pads[i].entity = entity;
@@ -391,8 +390,7 @@ static int media_enum_entities(struct media_device *media)
 		entity->info.id = id | MEDIA_ENT_ID_FLAG_NEXT;
 		entity->media = media;
 
-		ret = ioctl(media->fd, MEDIA_IOC_ENUM_ENTITIES, &entity->info);
-		app_info("ioctl,MEDIA_IOC_ENUM_ENTITIES\n");
+		ret = idm_ioctl(media->fd, MEDIA_IOC_ENUM_ENTITIES, &entity->info);
 		if (ret < 0) {
 			ret = errno != EINVAL ? -errno : 0;
 			break;
@@ -463,7 +461,7 @@ struct media_device *media_open_debug(
 
 	media_dbg(media, "Opening media device %s\n", name);
 
-	media->fd = open(name, O_RDWR);
+	media->fd = idm_open(name, O_RDWR);
 	if (media->fd < 0) {
 		media_close(media);
 		media_dbg(media, "%s: Can't open media device %s\n",
@@ -471,8 +469,7 @@ struct media_device *media_open_debug(
 		return NULL;
 	}
 
-	ret = ioctl(media->fd, MEDIA_IOC_DEVICE_INFO, &media->info);
-	app_info("ioctl,MEDIA_IOC_DEVICE_INFO\n");
+	ret = idm_ioctl(media->fd, MEDIA_IOC_DEVICE_INFO, &media->info);
 	if (ret < 0) {
 		media_dbg(media, "%s: Unable to retrieve media device "
 			  "information for device %s (%s)\n", __func__,
@@ -518,7 +515,7 @@ void media_close(struct media_device *media)
 	unsigned int i;
 
 	if (media->fd != -1)
-		close(media->fd);
+		idm_close(media->fd);
 
 	for (i = 0; i < media->entities_count; ++i) {
 		struct media_entity *entity = &media->entities[i];
@@ -526,7 +523,7 @@ void media_close(struct media_device *media)
 		free(entity->pads);
 		free(entity->links);
 		if (entity->fd != -1)
-			close(entity->fd);
+			idm_close(entity->fd);
 	}
 
 	free(media->entities);

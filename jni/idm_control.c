@@ -11,6 +11,7 @@
 #include <errno.h>
 
 #include "tools.h"
+#include "idm_utils.h"
 #include "idm_control.h"
 #include "idm_v4l2.h"
 
@@ -148,7 +149,6 @@ int idm_ctl_platform_dump(void)
     return 0;
 }
 
-
 int idm_ctl_node_open(struct idm_node *node)
 {
     if (node->open_flag == 0){
@@ -196,7 +196,6 @@ int idm_ctl_init(void)
     /* enum entities, add node to idm for each media_entity */
     for (i = 0; i < IDM_NODE_MAX_CNT; i++) {
         struct idm_map  *idname_map = &idm_map_table[i];
-        idm_info("Finding node: %s",idname_map->name);
         if(NULL == idname_map->name)
             continue;
         struct media_entity *me = media_get_entity_by_name(idm_plat.media,idname_map->name,strlen(idname_map->name));
@@ -276,7 +275,7 @@ int idm_ctl_disable_link_by_id(enum idm_dev_id sid, enum idm_dev_id did)
 }
 
 /* 
- * set format & crop
+ * set format & crop for subdev
  * args: fmts, format arrays; n number of formats
  */ 
 /*
@@ -290,11 +289,11 @@ int idm_ctl_disable_link_by_id(enum idm_dev_id sid, enum idm_dev_id did)
    return idm_ioctl(fd, VIDIOC_SUBDEV_S_SELECTION, &sel);
    }
    */
-int idm_ctl_set_fmts(struct idm_fmt_crop *fmts, int n)
+int idm_ctl_sd_set_fmts(struct idm_sd_fmt *fmts, int n)
 {
     int i,fd,ret;
     struct idm_node *node;
-    struct idm_fmt_crop *fmt;
+    struct idm_sd_fmt *fmt;
 
     for(i=0; i<n; i++){
         fmt = &fmts[i];
@@ -335,6 +334,111 @@ int idm_ctl_set_fmts(struct idm_fmt_crop *fmts, int n)
             }
         }
     }
+    return 0;
+}
+
+static int idm_ctl_fill_v4l2_fmt(struct v4l2_format *v4l2_fmt, __u32 pix_fmt, __u32 width, __u32 height)
+{
+    if (v4l2_fmt == NULL)
+    {
+        idm_err("v4l2_format is NULL");
+        return -EINVAL;
+    }
+
+    memset(v4l2_fmt, 0, sizeof(struct v4l2_format));
+
+    v4l2_fmt->fmt.pix.width = width;
+    v4l2_fmt->fmt.pix.height = height;
+    v4l2_fmt->fmt.pix.pixelformat = pix_fmt;
+
+    return 0;
+}
+int idm_ctl_vd_set_fmts(struct idm_vd_fmt *fmts, int n)
+{
+    int i,fd,ret;
+    struct idm_node *node;
+    struct idm_vd_fmt *fmt;
+    struct v4l2_format v4l2_fmt;
+
+    for(i=0; i<n; i++){
+        fmt = &fmts[i];
+        node = idm_ctl_find_node_by_id(fmt->dev_id);
+        if(NULL == node){
+            idm_err("node for fmts[%d].dev_id=%d not found",i,fmt->dev_id);
+            break;
+        }
+        fd = idm_ctl_node_open(node);
+        if(0 > fd)
+            break;
+
+        memset(&v4l2_fmt,0,sizeof(v4l2_fmt));
+        ret = idm_ctl_fill_v4l2_fmt(&v4l2_fmt, fmt->pix_fmt, fmt->width, fmt->height);
+        if (ret < 0)
+            return ret;
+
+        ret = idm_ioctl(fd, VIDIOC_S_FMT, &v4l2_fmt);
+        if (ret  < 0)
+        {
+            idm_err("%s: set format failed: %s", fmt->name, strerror(errno));
+            return -errno;
+        }
+        //write back fmt info
+        memcpy(&fmt->v4l2_fmt, &v4l2_fmt, sizeof(struct v4l2_format));
+    }
+    return 0;
+}
+
+struct idm_buf_desc
+{
+	void	*addr;
+	__s32	dmabuf_fd;
+	size_t	len;
+	struct v4l2_plane planes[VIDEO_MAX_PLANES];
+};
+
+struct idm_buf_info
+{
+	__u32	buf_type;
+	__u32	memory;
+	__u16	nr_buf;
+    struct idm_buf_desc *dsc;
+};
+
+int idm_ctl_vd_reqbuf(struct idm_node *node, struct idm_buf_info *buf)
+{
+    int ret,fd;
+    /* allocate buffer coherent */
+    if(buf->dsc)
+        return -1;
+    buf->dsc = calloc(buf->nr_buf, sizeof(*buf->dsc));
+    if(NULL == buf->dsc) {
+        c_err("can't alloc camera buffer descriptor");
+        return -1;
+    }
+    fd = idm_ctl_node_open(node);
+    if(0 > ret){
+        idm_err("can't open node:%s", strerror(errno));
+        return -errno;
+    }
+    /* request driver buffers */ 
+    struct v4l2_requestbuffers buf_req;
+    buf_req.type	= buf->buf_type;
+    buf_req.count	= buf->nr_buf;
+    buf_req.memory	= buf->memory;
+
+    ret = idm_ioctl(fd, VIDIOC_REQBUFS, &buf_req);
+    if(0 > ret){
+        idm_err("can't require buffer:%s", strerror(errno));
+        return -errno;
+    }
+
+    if (buf_req.count != buf->nr_buf)
+    {
+        idm_err("insufficient buffer allocated\n");
+        return -1;
+    }
+
+    idm_info("%d buffer requested", buf_req.count);
     return 0;
 }
 

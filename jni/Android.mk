@@ -18,9 +18,6 @@ LOCAL_SRC_FILES := media-ctl/v4l2subdev.c \
 		idm_v4l2.c \
 		idm_control.c \
 		idm_control_test.c
-		#media_lib.c \
-		#camera_api.c\
-		#idm_test_main.c
 
 LOCAL_LDFLAGS := -static
 include $(BUILD_EXECUTABLE)

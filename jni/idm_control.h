@@ -13,7 +13,7 @@
 #include <linux/v5628_api.h>
 #include <linux/v4l2-subdev.h>
 
-#define IDM_DEBUG_EN
+#define VIDEO_MAX_PLANES         8
 
 enum idm_dev_id {
     //subdev
@@ -203,7 +203,7 @@ enum {
 	IDM_APPLY_CROP = 0x01<<1
 };
 
-struct idm_fmt_crop{
+struct idm_sd_fmt{
 	enum idm_dev_id dev_id;
     __u32	which;
 	__u32	pad;
@@ -212,6 +212,15 @@ struct idm_fmt_crop{
 	__u32	height;
 	__u32	code;
 	__u8	ops;	/* If bit[IDM_APPLY_FMT] set: apply w/h/c. if bit[IDM_APPLY_CROP] set: apply CropWnd */
+};
+
+struct idm_vd_fmt{
+	enum idm_dev_id dev_id;
+	char	name[32];
+	__u32	width;
+	__u32	height;
+	__u32	pix_fmt;
+	struct v4l2_format	v4l2_fmt;
 };
 
 enum idm_topology_type{
@@ -273,8 +282,9 @@ int idm_ctl_disable_link_by_id(enum idm_dev_id sid, enum idm_dev_id did);
  * set format & crop
  * args: fmts, format arrays; n number of formats
  */ 
-int idm_ctl_set_fmts(struct idm_fmt_crop *fmts, int n);
+int idm_ctl_sd_set_fmts(struct idm_sd_fmt *fmts, int n);
  
+int idm_ctl_vd_set_fmts(struct idm_vd_fmt *fmts, int n);
 /* 
  * trigger snapshot ioctl
  */
@@ -285,32 +295,6 @@ int idm_ctl_trig_snapshot(enum idm_dev_id id);
  */
 int idm_ctl_exit(void);
 
-
-#ifdef IDM_DEBUG_EN 
-
-#define idm_err(format, arg...)		\
-	do { \
-	printf("[IDM:ERROR]: " format "\n", ## arg); \
-	fflush(stdout); \
-	} while (0)
-#define idm_warn(format, arg...)		\
-	do { \
-	printf("[IDM:WARNING]: " format "\n", ## arg); \
-	fflush(stdout); \
-	} while (0)
-#define idm_info(format, arg...)		\
-	do { \
-	printf("[IDM:INFO][%s]: " format "\n",__FUNCTION__, ## arg); \
-	fflush(stdout); \
-	} while (0)
-
-#else
-
-#define idm_err(format, arg...)	    do{}while(0)	
-#define idm_warn(format, arg...)    do{}while(0)	
-#define idm_info(format, arg...)	do{}while(0)
-
-#endif
 
 #endif //__IDM_CONTROL_H__
 

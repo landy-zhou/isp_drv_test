@@ -154,10 +154,14 @@ void case_online_test(void)
 
 int main(int argc, char **argv)
 {
-
-    idm_ctl_init();
+    int ret;
+    ret = idm_ctl_init();
+    if(0 > ret)
+        return -1;
     idm_ctl_platform_dump();
+
     case_online_test();
+
     idm_ctl_exit();
     return 0;
 }

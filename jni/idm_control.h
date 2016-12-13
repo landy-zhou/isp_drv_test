@@ -168,13 +168,13 @@ enum idm_node_type{
     IDM_NODE_VCM,
     IDM_NODE_FLASH
 };
-
+/*
 struct idm_typename_map{
     enum idm_node_type type;
     char **name;
 };
-
-struct idm_idname_map{
+*/
+struct idm_map{
     enum idm_dev_id id;
     char *name;
     enum idm_node_type type;
@@ -248,10 +248,16 @@ struct idm_offline_topology {
  */
 int idm_ctl_init(void);
 
+/* 
+ * create a node for entity and add it to idm_plat
+ */
+int idm_ctl_node_add(struct idm_platform *plat, struct media_entity *me, int id);
+
 /*
  * open node and reture fd
  */
 int idm_ctl_node_open(struct idm_node *node);
+
 /* 
  * idm_platform_dump: dump struct idm_platform info
  */

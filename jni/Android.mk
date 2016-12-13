@@ -14,6 +14,8 @@ LOCAL_SRC_FILES := media-ctl/v4l2subdev.c \
 		mem-ion/ion.c \
 		mem-ion/ovmem_ion.c \
 		mem-ion/vbmem_lib.c \
+		idm_utils.c \
+		idm_v4l2.c \
 		idm_control.c \
 		idm_control_test.c
 		#media_lib.c \
